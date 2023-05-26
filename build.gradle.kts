@@ -23,7 +23,6 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation("com.lordcodes.turtle:turtle:0.5.0")
             }
         }
         val jvmTest by getting
