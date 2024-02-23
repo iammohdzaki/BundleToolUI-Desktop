@@ -26,6 +26,7 @@ kotlin {
             }
         }
         val jvmTest by getting
+        val resourcesDir = "src/common/resources"
     }
 }
 

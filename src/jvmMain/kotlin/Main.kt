@@ -5,7 +5,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -15,20 +14,20 @@ import kotlinx.coroutines.launch
 import theme.Styles
 import java.awt.FileDialog
 import java.awt.Frame
-import javax.swing.text.Style
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 @Composable
 @Preview
 fun App() {
-
     val coroutineScope = rememberCoroutineScope()
-
     var logs by remember { mutableStateOf("========== Logs View ==========\n\n") }
     var isLoading by remember { mutableStateOf(false) }
     var isOpen by remember { mutableStateOf(false) }
     if (isOpen) {
         FileDialog { fileName, directory ->
             isOpen = false
+            //Get Command to Execute
             val cmd = Constant.getCommand().replace("INPUT_FILE_PATH", "${directory}$fileName")
                 .replace("OUTPUT_FILE_NAME", "${directory}${fileName.split(".")[0]}")
             Log.i("Command $cmd")
@@ -39,12 +38,20 @@ fun App() {
                 val runtime = Runtime.getRuntime()
                 val startTime = System.currentTimeMillis()
                 try {
+                    //Launch Runtime to execute command
                     val process = runtime.exec(cmd)
+                    // Read and log error output
+                    val errorReader = BufferedReader(InputStreamReader(process.errorStream))
+                    Log.i("Process Error Output:")
+                    while (errorReader.readLine().also { logs += "\n ERROR -> $it" } != null) {
+                        isLoading = false
+                    }
                     process.waitFor()
                     val endTime = System.currentTimeMillis()
                     if (process.exitValue() == 0) {
                         Log.i("Command Executed in ${((endTime - startTime) / 1000)}s")
                         logs += "\nCommand Executed in ${((endTime - startTime) / 1000)}s\n"
+                        // Do further file operation after new apks is generated
                         FileHelper.performFileOperations(directory, fileName) { status, message ->
                             isLoading = false
                             Log.i("STATUS - $status\nMESSAGE - $message")
