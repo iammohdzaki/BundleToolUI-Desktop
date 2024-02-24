@@ -1,6 +1,6 @@
-# AAB TO APK CONVERTER (IN DEVELOPMENT)
+# Bundle Tool UI - Desktop (IN DEVELOPMENT)
 
-AAB to APK Converter is an open-source tool built with Kotlin and Desktop Compose that allows users to convert Android App Bundles (AAB) to Android Package (APK) files using Google's [BundleTool](https://github.com/google/bundletool).
+Bundle Tool UI - Desktop is an open-source tool built with Kotlin and Desktop Compose that allows users to convert Android App Bundles (AAB) to Android Package (APK) files using Google's [BundleTool](https://github.com/google/bundletool).
 
 ![ATA](https://github.com/iammohdzaki/AabToApk-Desktop/blob/main/screenshots/ata.png)
 
