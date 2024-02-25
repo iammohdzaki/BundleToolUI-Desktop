@@ -23,6 +23,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                api("com.esotericsoftware:kryo:4.0.1")
             }
         }
         val jvmTest by getting
