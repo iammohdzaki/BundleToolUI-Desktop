@@ -1,3 +1,5 @@
+package utils
+
 object Log {
 
     var showLogs: Boolean = true
