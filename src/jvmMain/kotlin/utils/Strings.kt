@@ -30,4 +30,6 @@ object Strings {
     const val FILE_OPTIONS = "File Options"
     const val AUTO_UNZIP = "Automatically Unzip and Delete Apks File"
     const val AUTO_UNZIP_INFO = "Automatically Unzip and Delete Apks File"
+    const val CLEAR_LOGS = "Clear Logs"
+    const val LOGS_VIEW = "Logs View"
 }

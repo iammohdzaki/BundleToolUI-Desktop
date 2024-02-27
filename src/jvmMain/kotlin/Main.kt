@@ -6,6 +6,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.loadSvgPainter
+import androidx.compose.ui.res.useResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -29,13 +32,13 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URI
 import utils.Strings
-import java.nio.file.Paths
 
 @Composable
 @Preview
 fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
+    val density = LocalDensity.current // to calculate the intrinsic size of vector images (SVG, XML)
     val coroutineScope = rememberCoroutineScope()
-    var logs by remember { mutableStateOf("========== Logs View ==========\n\n") }
+    var logs by remember { mutableStateOf("") }
     var bundletoolPath by remember { mutableStateOf("") }
     var aabFilePath by remember { mutableStateOf(Pair<String, String>("", "")) }
     var isLoading by remember { mutableStateOf(false) }
@@ -53,8 +56,11 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
     var keyAlias by remember { mutableStateOf("") }
     var keyPassword by remember { mutableStateOf("") }
     var isAutoUnzip by remember { mutableStateOf(true) }
+    var savedJarPath by remember { mutableStateOf(savedPath) }
 
-    savedPath?.let {
+
+    //TODO: KNOWN ISSUE - Can't update file path once saved, For now Delete path.kb file inside storage directory.
+    savedJarPath?.let {
         bundletoolPath = it
         saveJarPath = true
     }
@@ -93,14 +99,6 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
             Log.i("Command $cmd")
             logs += "Executing Command : \n$cmd\n"
             coroutineScope.launch(Dispatchers.IO) {
-                //Save Path in Storage
-                if (savedPath == null) {
-                    fileStorageHelper.save("path", bundletoolPath)
-                } else {
-                    if (fileStorageHelper.delete("path"))
-                        saveJarPath = false
-                }
-
                 val runtime = Runtime.getRuntime()
                 val startTime = System.currentTimeMillis()
                 try {
@@ -128,6 +126,19 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                         } else {
                             logs += "\nFile will be saved at ${aabFilePath.first.removeSuffix("\\")}.\n"
                             isLoading = false
+                        }
+
+                        //Save Path in Storage
+                        //If We don't have any saved path in file storage and save jar path option is checked.Then,we can save new value in storage.
+                        if (savedJarPath == null && saveJarPath) {
+                            fileStorageHelper.save("path", bundletoolPath)
+                        }
+                        // If we have saved path in file storage, and it is not changed and save jar path is checked. Then, we can update the value in file storage.
+                        else if (savedJarPath != null && savedJarPath != bundletoolPath && saveJarPath) {
+                            fileStorageHelper.save("path", bundletoolPath)
+                        } else {
+                            if (fileStorageHelper.delete("path"))
+                                saveJarPath = false
                         }
                     }
                 } catch (e: Exception) {
@@ -360,9 +371,36 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                     )
                 }
             }
-            Spacer(modifier = Modifier.padding(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(
+                    text = Strings.LOGS_VIEW,
+                    style = Styles.TextStyleBold(20.sp),
+                    modifier = Modifier.padding(start = 0.dp, end = 0.dp, bottom = 8.dp)
+                )
+                Button(
+                    modifier = Modifier.padding(end = 0.dp, bottom = 8.dp),
+                    onClick = {
+                        logs = ""
+                    },
+                ) {
+                    Text(
+                        text = Strings.CLEAR_LOGS,
+                        style = Styles.TextStyleBold(13.sp),
+                    )
+                    Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+                    Icon(
+                        painter = useResource("clear.svg") { loadSvgPainter(it, density) },
+                        contentDescription = "Clear",
+                        modifier = Modifier.size(ButtonDefaults.IconSize),
+                    )
+                }
+            }
             TextField(
-                modifier = Modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                modifier = Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 value = logs,
                 textStyle = Styles.TextStyleMedium(16.sp),
                 onValueChange = {},
