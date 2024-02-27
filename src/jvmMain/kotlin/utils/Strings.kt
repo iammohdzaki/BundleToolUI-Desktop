@@ -27,4 +27,7 @@ object Strings {
     const val KEY_ALIAS = "Key Alias"
     const val KEY_PASSWORD = "Key Password"
     const val EXECUTE = "Execute"
+    const val FILE_OPTIONS = "File Options"
+    const val AUTO_UNZIP = "Automatically Unzip and Delete Apks File"
+    const val AUTO_UNZIP_INFO = "Automatically Unzip and Delete Apks File"
 }

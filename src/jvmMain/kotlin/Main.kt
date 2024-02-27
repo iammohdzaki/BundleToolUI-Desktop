@@ -52,6 +52,7 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
     var keyStorePassword by remember { mutableStateOf("") }
     var keyAlias by remember { mutableStateOf("") }
     var keyPassword by remember { mutableStateOf("") }
+    var isAutoUnzip by remember { mutableStateOf(true) }
 
     savedPath?.let {
         bundletoolPath = it
@@ -96,7 +97,7 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                 if (savedPath == null) {
                     fileStorageHelper.save("path", bundletoolPath)
                 } else {
-                    if(fileStorageHelper.delete("path"))
+                    if (fileStorageHelper.delete("path"))
                         saveJarPath = false
                 }
 
@@ -117,10 +118,16 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                         Log.i("Command Executed in ${((endTime - startTime) / 1000)}s")
                         logs += "\nCommand Executed in ${((endTime - startTime) / 1000)}s\n"
                         // Do further file operation after new apks is generated
-                        FileHelper.performFileOperations(aabFilePath.first, aabFilePath.second) { status, message ->
+                        // From Auto Zip you can control further file operations.
+                        if (isAutoUnzip) {
+                            FileHelper.performFileOperations(aabFilePath.first, aabFilePath.second) { status, message ->
+                                isLoading = false
+                                Log.i("STATUS - $status\nMESSAGE - $message")
+                                logs += "\nFiles Operations Starting...\n$message\n"
+                            }
+                        } else {
+                            logs += "\nFile will be saved at ${aabFilePath.first.removeSuffix("\\")}.\n"
                             isLoading = false
-                            Log.i("STATUS - $status\nMESSAGE - $message")
-                            logs += "\nFiles Operations Starting...\n$message\n"
                         }
                     }
                 } catch (e: Exception) {
@@ -316,6 +323,19 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                     )
                 }
             }
+            Text(
+                text = Strings.FILE_OPTIONS,
+                style = Styles.TextStyleBold(16.sp),
+                modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
+            )
+            CheckboxWithText(
+                Strings.AUTO_UNZIP,
+                isAutoUnzip,
+                onCheckedChange = {
+                    isAutoUnzip = it
+                },
+                Strings.AUTO_UNZIP
+            )
             Spacer(modifier = Modifier.padding(8.dp))
             if (isLoading) {
                 CircularProgressIndicator(
