@@ -26,7 +26,12 @@ kotlin {
                 api("com.esotericsoftware:kryo:4.0.1")
             }
         }
-        val jvmTest by getting
+        val jvmTest by getting {
+            dependencies {
+                implementation(compose.desktop.uiTestJUnit4)
+                implementation(compose.desktop.currentOs)
+            }
+        }
         val resourcesDir = "src/common/resources"
     }
 }

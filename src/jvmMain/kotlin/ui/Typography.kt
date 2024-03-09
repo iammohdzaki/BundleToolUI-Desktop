@@ -1,4 +1,4 @@
-package theme
+package ui
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle

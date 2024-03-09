@@ -17,3 +17,4 @@ object SigningMode{
     const val DEBUG = 1
     const val RELEASE = 2
 }
+
