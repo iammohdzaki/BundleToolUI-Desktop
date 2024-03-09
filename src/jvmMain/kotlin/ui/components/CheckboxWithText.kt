@@ -1,4 +1,4 @@
-package theme.components
+package ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
@@ -16,12 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import theme.Styles
+import ui.Styles
+import utils.TestTags
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -32,10 +34,12 @@ fun CheckboxWithText(label: String, isChecked: Boolean, onCheckedChange: (Boolea
         modifier = Modifier.padding(end = 16.dp)
     ) {
         Checkbox(
+            modifier = Modifier.testTag(TestTags.CHECKBOX_TAG),
             checked = isChecked,
             onCheckedChange = { onCheckedChange.invoke(it) },
         )
         Text(
+            modifier = Modifier.testTag(TestTags.TEXT_TAG),
             text = label,
             style = Styles.TextStyleMedium(14.sp),
         )
@@ -60,7 +64,7 @@ fun CheckboxWithText(label: String, isChecked: Boolean, onCheckedChange: (Boolea
                     alignment = Alignment.BottomEnd,
                     offset = DpOffset.Zero // tooltip offset
                 )
-            ){
+            ) {
                 Icon(
                     painter = useResource("info.svg") { loadSvgPainter(it, density) },
                     contentDescription = "Info",

@@ -20,10 +20,10 @@ import androidx.compose.ui.window.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import local.FileStorageHelper
-import theme.Styles
-import theme.components.CheckboxWithText
-import theme.components.ChooseFileTextField
-import theme.components.CustomTextField
+import ui.Styles
+import ui.components.CheckboxWithText
+import ui.components.ChooseFileTextField
+import ui.components.CustomTextField
 import utils.*
 import java.awt.Desktop
 import java.awt.FileDialog
