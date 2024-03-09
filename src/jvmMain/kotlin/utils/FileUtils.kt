@@ -1,6 +1,10 @@
 package utils
 
-import java.io.*
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
+import java.io.FileOutputStream
 import java.util.zip.ZipFile
 
 object FileUtils {
@@ -12,7 +16,6 @@ object FileUtils {
 
     fun deleteFile(file: File) =
         file.delete()
-
 
     /**
      * @param oldFile
@@ -72,5 +75,4 @@ object FileUtils {
         }
         bos.close()
     }
-
 }

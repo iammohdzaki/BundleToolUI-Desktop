@@ -1,11 +1,10 @@
 package utils
 
-import java.util.*
+import java.util.Locale
 
 object Utils {
 
-    fun isWindowsOS(): Boolean{
+    fun isWindowsOS(): Boolean {
         return System.getProperty("os.name").lowercase(Locale.getDefault()).contains("windows")
     }
-
 }

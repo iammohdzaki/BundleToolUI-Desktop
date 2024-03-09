@@ -2,7 +2,7 @@ name: kotlin_lint
 
 on:
   push:
-    branches:
+    branches-ignore:
       - "*"
   pull_request:
     paths:
@@ -12,7 +12,6 @@ on:
 jobs:
   ktlint:
     runs-on: ubuntu-latest
-
     steps:
       - name: "checkout"
         uses: actions/checkout@v2

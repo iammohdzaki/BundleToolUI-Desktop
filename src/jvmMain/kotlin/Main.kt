@@ -1,8 +1,28 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,15 +36,28 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.AwtWindow
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import command.CommandBuilder
 import command.CommandExecutor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import local.FileStorageHelper
 import ui.Styles
-import ui.components.*
-import utils.*
+import ui.components.ButtonWithToolTip
+import ui.components.CheckboxWithText
+import ui.components.ChooseFileTextField
+import ui.components.CustomTextField
+import ui.components.LoadingDialog
+import utils.Constant
+import utils.DBConstants
+import utils.FileDialogType
+import utils.FileHelper
+import utils.Log
+import utils.SigningMode
 import java.awt.Desktop
 import java.awt.FileDialog
 import java.awt.Frame
@@ -61,13 +94,13 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
     var adbPath by remember { mutableStateOf("") }
     var showLoadingDialog by remember { mutableStateOf(Pair("", false)) }
 
-    //TODO: (Fixed this issue need to test more!) - Can't update file path once saved, For now Delete path.kb file inside storage directory.
+    // TODO: (Fixed this issue need to test more!) - Can't update file path once saved, For now Delete path.kb file inside storage directory.
     savedJarPath?.let {
         bundletoolPath = it
         saveJarPath = true
     }
 
-    //Check if ADB Setup is Done or Not
+    // Check if ADB Setup is Done or Not
     adbSavedPath?.let {
         adbPath = it
         isAdbSetupDone = true
@@ -80,12 +113,12 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                 return@FileDialog
             }
             when (fileDialogType) {
-                FileDialogType.BUNDLETOOL -> bundletoolPath = "${directory}$fileName"
-                FileDialogType.AAPT2 -> aapt2Path = "${directory}$fileName"
-                FileDialogType.KEY_STORE_PATH -> keyStorePath = "${directory}$fileName"
+                FileDialogType.BUNDLETOOL -> bundletoolPath = "$directory$fileName"
+                FileDialogType.AAPT2 -> aapt2Path = "$directory$fileName"
+                FileDialogType.KEY_STORE_PATH -> keyStorePath = "$directory$fileName"
                 FileDialogType.ADB_PATH -> {
-                    adbPath = "${directory}${fileName}"
-                    //Show Loading Here
+                    adbPath = "$directory$fileName"
+                    // Show Loading Here
                     showLoadingDialog = Pair(Strings.VERIFYING_ADB_PATH, true)
                     CommandExecutor().executeCommand(
                         CommandBuilder()
@@ -96,14 +129,14 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                             isAdbSetupDone = true
                             Log.i("Saving Path in DB $adbPath")
                             fileStorageHelper.save(DBConstants.ADB_PATH, adbPath)
-                            //Hide Loading
+                            // Hide Loading
                             Thread.sleep(1000L)
                             showLoadingDialog = Pair(Strings.VERIFYING_ADB_PATH, false)
                         },
                         onFailure = {
                             logs += it
                             isAdbSetupDone = false
-                            //Hide Loading
+                            // Hide Loading
                             showLoadingDialog = Pair(Strings.VERIFYING_ADB_PATH, false)
                         }
                     )
@@ -122,7 +155,7 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
 
     if (isExecute) {
         isExecute = false
-        //Get Command to Execute
+        // Get Command to Execute
         val (cmd, isValid) = CommandBuilder()
             .bundletoolPath(bundletoolPath)
             .aabFilePath(aabFilePath)
@@ -143,7 +176,7 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                 val runtime = Runtime.getRuntime()
                 val startTime = System.currentTimeMillis()
                 try {
-                    //Launch Runtime to execute command
+                    // Launch Runtime to execute command
                     val process = runtime.exec(cmd)
                     // Read and log error output
                     val errorReader = BufferedReader(InputStreamReader(process.errorStream))
@@ -169,8 +202,8 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                             isLoading = false
                         }
 
-                        //Save Path in Storage
-                        //If We don't have any saved path in file storage and save jar path option is checked.Then,we can save new value in storage.
+                        // Save Path in Storage
+                        // If We don't have any saved path in file storage and save jar path option is checked.Then,we can save new value in storage.
                         if (savedJarPath == null && saveJarPath) {
                             fileStorageHelper.save("path", bundletoolPath)
                         }
@@ -216,7 +249,7 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                         isOpen = true
                     },
                     Strings.SETUP_ADB_INFO,
-                    icon = if (isAdbSetupDone) "done" else "info",
+                    icon = if (isAdbSetupDone) "done" else "info"
                 )
             }
             Spacer(modifier = Modifier.padding(8.dp))
@@ -225,7 +258,7 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                 modifier = Modifier.wrapContentSize(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                //Bundle tool select flow
+                // Bundle tool select flow
                 ChooseFileTextField(
                     bundletoolPath,
                     Strings.SELECT_BUNDLETOOL_JAR,
@@ -415,13 +448,13 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                         isExecute = true
                     },
                     modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
-                        .wrapContentWidth(),
+                        .wrapContentWidth()
                 ) {
                     Text(
                         text = Strings.EXECUTE,
                         style = Styles.TextStyleMedium(16.sp),
                         color = Color.White,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -439,17 +472,17 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                     modifier = Modifier.padding(end = 0.dp, bottom = 8.dp),
                     onClick = {
                         logs = ""
-                    },
+                    }
                 ) {
                     Text(
                         text = Strings.CLEAR_LOGS,
-                        style = Styles.TextStyleBold(13.sp),
+                        style = Styles.TextStyleBold(13.sp)
                     )
                     Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
                     Icon(
                         painter = useResource("clear.svg") { loadSvgPainter(it, density) },
                         contentDescription = "Clear",
-                        modifier = Modifier.size(ButtonDefaults.IconSize),
+                        modifier = Modifier.size(ButtonDefaults.IconSize)
                     )
                 }
             }
@@ -457,7 +490,7 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                 modifier = Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 value = logs,
                 textStyle = Styles.TextStyleMedium(16.sp),
-                onValueChange = {},
+                onValueChange = {}
             )
         }
     }
@@ -481,10 +514,9 @@ private fun FileDialog(
     dispose = FileDialog::dispose
 )
 
-
 fun main() = application {
     val fileStorageHelper = FileStorageHelper()
-    //Check if path for bundletool exists in local storage
+    // Check if path for bundletool exists in local storage
     val path = fileStorageHelper.read(DBConstants.BUNDLETOOL_PATH) as String?
     val adbPath = fileStorageHelper.read(DBConstants.ADB_PATH) as String?
     Log.showLogs = true

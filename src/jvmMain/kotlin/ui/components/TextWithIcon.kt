@@ -24,13 +24,13 @@ fun TextWithIcon(label: String, onIconClick: () -> Unit) {
             text = label,
             style = Styles.TextStyleMedium(16.sp),
             color = Color.Black,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
         Icon(
             painter = useResource("info.svg") { loadSvgPainter(it, density) },
             contentDescription = "Info",
             modifier = Modifier.padding(start = 8.dp)
-                .clickable { onIconClick.invoke() },
+                .clickable { onIconClick.invoke() }
         )
     }
 }

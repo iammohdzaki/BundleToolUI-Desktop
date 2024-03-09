@@ -6,7 +6,12 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.Surface
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonColors
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +28,13 @@ import ui.Styles
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ButtonWithToolTip(label: String, onClick: () -> Unit, toolTipText: String = "", icon: String = "info", buttonColors: ButtonColors = ButtonDefaults.buttonColors()) {
+fun ButtonWithToolTip(
+    label: String,
+    onClick: () -> Unit,
+    toolTipText: String = "",
+    icon: String = "info",
+    buttonColors: ButtonColors = ButtonDefaults.buttonColors()
+) {
     val density = LocalDensity.current // to calculate the intrinsic size of vector images (SVG, XML)
     Button(
         onClick = {
@@ -31,13 +42,13 @@ fun ButtonWithToolTip(label: String, onClick: () -> Unit, toolTipText: String = 
         },
         colors = buttonColors,
         modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
-            .wrapContentWidth(),
+            .wrapContentWidth()
     ) {
         Text(
             text = label,
             style = Styles.TextStyleMedium(16.sp),
             color = Color.White,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Medium
         )
         if (toolTipText.isNotEmpty()) {
             TooltipArea(

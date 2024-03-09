@@ -2,7 +2,12 @@ package ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
@@ -45,13 +50,11 @@ fun LoadingDialog(text: String) {
                     Text(
                         text = text,
                         style = Styles.TextStyleBold(20.sp),
-                        modifier = Modifier.padding(start = 8.dp,end = 8.dp, bottom = 8.dp)
+                        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
                     )
                     CircularProgressIndicator()
                 }
             }
         }
-
     }
-
 }

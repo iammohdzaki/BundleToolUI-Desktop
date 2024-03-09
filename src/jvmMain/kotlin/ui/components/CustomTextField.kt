@@ -49,13 +49,13 @@ fun CustomTextField(value: String, label: String, forPassword: Boolean = true, o
                 Text(
                     text = label,
                     style = Styles.TextStyleMedium(16.sp),
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Medium
                 )
             },
             textStyle = Styles.TextStyleMedium(16.sp),
             onValueChange = {
                 onValueChange.invoke(it)
-            },
+            }
         )
     }
 }

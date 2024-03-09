@@ -29,11 +29,11 @@ class CommandBuilder {
     fun keyAlias(alias: String) = apply { this.keyAlias = alias }
     fun keyPassword(password: String) = apply { this.keyPassword = password }
 
-    fun verifyAdbPath(value: Boolean, path: String) = apply { this.adbVerifyCommandExecute = Pair(value,path) }
+    fun verifyAdbPath(value: Boolean, path: String) = apply { this.adbVerifyCommandExecute = Pair(value, path) }
 
     fun getAdbVerifyCommand(): String {
-        val (forVerify,path) = adbVerifyCommandExecute
-        if (forVerify){
+        val (forVerify, path) = adbVerifyCommandExecute
+        if (forVerify) {
             return "\"${path}\" version"
         }
         return ""

@@ -36,12 +36,12 @@ fun CheckboxWithText(label: String, isChecked: Boolean, onCheckedChange: (Boolea
         Checkbox(
             modifier = Modifier.testTag(TestTags.CHECKBOX_TAG),
             checked = isChecked,
-            onCheckedChange = { onCheckedChange.invoke(it) },
+            onCheckedChange = { onCheckedChange.invoke(it) }
         )
         Text(
             modifier = Modifier.testTag(TestTags.TEXT_TAG),
             text = label,
-            style = Styles.TextStyleMedium(14.sp),
+            style = Styles.TextStyleMedium(14.sp)
         )
         if (toolTipText.isNotEmpty()) {
             TooltipArea(

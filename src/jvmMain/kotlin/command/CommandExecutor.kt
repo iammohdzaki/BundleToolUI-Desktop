@@ -14,7 +14,7 @@ class CommandExecutor {
         onSuccess: (String) -> Unit,
         onFailure: (Throwable) -> Unit
     ) {
-        coroutineScope.launch(Dispatchers.IO){
+        coroutineScope.launch(Dispatchers.IO) {
             try {
                 val runtime = Runtime.getRuntime()
                 val startTime = System.currentTimeMillis()
@@ -51,5 +51,4 @@ class CommandExecutor {
             }
         }
     }
-
 }
