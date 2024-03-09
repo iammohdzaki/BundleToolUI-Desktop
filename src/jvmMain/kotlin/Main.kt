@@ -17,13 +17,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
+import command.CommandBuilder
+import command.CommandExecutor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import local.FileStorageHelper
 import ui.Styles
-import ui.components.CheckboxWithText
-import ui.components.ChooseFileTextField
-import ui.components.CustomTextField
+import ui.components.*
 import utils.*
 import java.awt.Desktop
 import java.awt.FileDialog
@@ -35,7 +35,7 @@ import utils.Strings
 
 @Composable
 @Preview
-fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
+fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: String?) {
     val density = LocalDensity.current // to calculate the intrinsic size of vector images (SVG, XML)
     val coroutineScope = rememberCoroutineScope()
     var logs by remember { mutableStateOf("") }
@@ -57,26 +57,67 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
     var keyPassword by remember { mutableStateOf("") }
     var isAutoUnzip by remember { mutableStateOf(true) }
     var savedJarPath by remember { mutableStateOf(savedPath) }
+    var isAdbSetupDone by remember { mutableStateOf(false) }
+    var adbPath by remember { mutableStateOf("") }
+    var showLoadingDialog by remember { mutableStateOf(Pair("", false)) }
 
-
-    //TODO: KNOWN ISSUE - Can't update file path once saved, For now Delete path.kb file inside storage directory.
+    //TODO: (Fixed this issue need to test more!) - Can't update file path once saved, For now Delete path.kb file inside storage directory.
     savedJarPath?.let {
         bundletoolPath = it
         saveJarPath = true
     }
 
+    //Check if ADB Setup is Done or Not
+    adbSavedPath?.let {
+        adbPath = it
+        isAdbSetupDone = true
+    }
+
     if (isOpen && !isLoading) {
         FileDialog { fileName, directory ->
             isOpen = false
+            if (fileName.isNullOrEmpty() || directory.isNullOrEmpty()) {
+                return@FileDialog
+            }
             when (fileDialogType) {
                 FileDialogType.BUNDLETOOL -> bundletoolPath = "${directory}$fileName"
                 FileDialogType.AAPT2 -> aapt2Path = "${directory}$fileName"
                 FileDialogType.KEY_STORE_PATH -> keyStorePath = "${directory}$fileName"
+                FileDialogType.ADB_PATH -> {
+                    adbPath = "${directory}${fileName}"
+                    //Show Loading Here
+                    showLoadingDialog = Pair(Strings.VERIFYING_ADB_PATH, true)
+                    CommandExecutor().executeCommand(
+                        CommandBuilder()
+                            .verifyAdbPath(true, adbPath)
+                            .getAdbVerifyCommand(), coroutineScope,
+                        onSuccess = {
+                            logs += it
+                            isAdbSetupDone = true
+                            Log.i("Saving Path in DB $adbPath")
+                            fileStorageHelper.save(DBConstants.ADB_PATH, adbPath)
+                            //Hide Loading
+                            Thread.sleep(1000L)
+                            showLoadingDialog = Pair(Strings.VERIFYING_ADB_PATH, false)
+                        },
+                        onFailure = {
+                            logs += it
+                            isAdbSetupDone = false
+                            //Hide Loading
+                            showLoadingDialog = Pair(Strings.VERIFYING_ADB_PATH, false)
+                        }
+                    )
+                }
+
                 else -> {
                     aabFilePath = Pair(directory, fileName)
                 }
             }
         }
+    }
+
+    if (showLoadingDialog.second) {
+        LoadingDialog(showLoadingDialog.first)
     }
 
     if (isExecute) {
@@ -158,13 +199,26 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
-
             Spacer(modifier = Modifier.padding(12.dp))
-            Text(
-                text = Strings.APP_NAME,
-                style = Styles.TextStyleBold(28.sp),
-                modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
-            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = Strings.APP_NAME,
+                    style = Styles.TextStyleBold(28.sp),
+                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
+                )
+                ButtonWithToolTip(
+                    if (isAdbSetupDone) Strings.ABD_SETUP_DONE else Strings.SETUP_ADB,
+                    onClick = {
+                        fileDialogType = FileDialogType.ADB_PATH
+                        isOpen = true
+                    },
+                    Strings.SETUP_ADB_INFO,
+                    icon = if (isAdbSetupDone) "done" else "info",
+                )
+            }
             Spacer(modifier = Modifier.padding(8.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -412,7 +466,7 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
 @Composable
 private fun FileDialog(
     parent: Frame? = null,
-    onCloseRequest: (fileName: String, directory: String) -> Unit
+    onCloseRequest: (fileName: String?, directory: String?) -> Unit
 ) = AwtWindow(
     create = {
         object : FileDialog(parent, Strings.CHOOSE_FILE, LOAD) {
@@ -431,16 +485,17 @@ private fun FileDialog(
 fun main() = application {
     val fileStorageHelper = FileStorageHelper()
     //Check if path for bundletool exists in local storage
-    val path = fileStorageHelper.read("path") as String?
+    val path = fileStorageHelper.read(DBConstants.BUNDLETOOL_PATH) as String?
+    val adbPath = fileStorageHelper.read(DBConstants.ADB_PATH) as String?
     Log.showLogs = true
     Window(
         onCloseRequest = ::exitApplication,
         state = rememberWindowState(
-            width = 1000.dp, height = 1000.dp,
+            width = 1200.dp, height = 1000.dp,
             position = WindowPosition(Alignment.Center)
         ),
         title = Strings.APP_NAME
     ) {
-        App(fileStorageHelper, path)
+        App(fileStorageHelper, path, adbPath)
     }
 }

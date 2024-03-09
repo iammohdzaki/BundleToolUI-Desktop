@@ -1,3 +1,5 @@
+package command
+
 import utils.SigningMode
 import utils.Utils
 
@@ -13,6 +15,7 @@ class CommandBuilder {
     private var keyStorePassword: String = ""
     private var keyAlias: String = ""
     private var keyPassword: String = ""
+    private var adbVerifyCommandExecute = Pair(false, "")
 
     fun bundletoolPath(path: String) = apply { this.bundletoolPath = path }
     fun aabFilePath(path: Pair<String, String>) = apply { this.aabFilePath = path }
@@ -25,6 +28,16 @@ class CommandBuilder {
     fun keyStorePassword(password: String) = apply { this.keyStorePassword = password }
     fun keyAlias(alias: String) = apply { this.keyAlias = alias }
     fun keyPassword(password: String) = apply { this.keyPassword = password }
+
+    fun verifyAdbPath(value: Boolean, path: String) = apply { this.adbVerifyCommandExecute = Pair(value,path) }
+
+    fun getAdbVerifyCommand(): String {
+        val (forVerify,path) = adbVerifyCommandExecute
+        if (forVerify){
+            return "\"${path}\" version"
+        }
+        return ""
+    }
 
     fun validateAndGetCommand(): Pair<String, Boolean> {
         if (bundletoolPath.isEmpty()) {
@@ -55,9 +68,15 @@ class CommandBuilder {
             if (isAapt2PathEnabled) {
                 commandBuilder.append("--aapt2=\"$aapt2Path\" ")
             }
-            commandBuilder.append("--bundle=\"${aabFilePath.first}${aabFilePath.second}\" --output=\"${aabFilePath.first}${aabFilePath.second.split(".")[0]}.apks\" ")
+            commandBuilder.append(
+                "--bundle=\"${aabFilePath.first}${aabFilePath.second}\" --output=\"${aabFilePath.first}${
+                    aabFilePath.second.split(
+                        "."
+                    )[0]
+                }.apks\" "
+            )
 
-            if (signingMode == SigningMode.RELEASE){
+            if (signingMode == SigningMode.RELEASE) {
                 commandBuilder.append("--ks=$keyStorePath --ks-pass=pass:$keyStorePassword --ks-key-alias=$keyAlias --key-pass=pass:$keyPassword ")
             }
 

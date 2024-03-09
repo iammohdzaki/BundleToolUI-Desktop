@@ -1,6 +1,9 @@
 name: kotlin_lint
 
 on:
+  push:
+    branches:
+      - "*"
   pull_request:
     paths:
       - "**/*.kt"
