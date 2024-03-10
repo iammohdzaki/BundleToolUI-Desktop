@@ -5,6 +5,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.FileOutputStream
+import java.nio.file.Paths
 import java.util.zip.ZipFile
 
 object FileUtils {
@@ -44,7 +45,8 @@ object FileUtils {
                 if (entry.name == skipFile) return@forEach
 
                 zip.getInputStream(entry).use { input ->
-                    val filePath = destDirectory + File.separator + entry.name
+                    val safeEntryName = Paths.get(entry.name).normalize().toString()
+                    val filePath = destDirectory + File.separator + safeEntryName
 
                     if (!entry.isDirectory) {
                         // if the entry is a file, extracts it
