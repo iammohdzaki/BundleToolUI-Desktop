@@ -17,6 +17,7 @@ class FileStorageHelper {
     init {
         initializeDir()
     }
+
     private fun getKryo(): Kryo {
         return if (this::kryo.isInitialized) {
             kryo
@@ -71,5 +72,4 @@ class FileStorageHelper {
             false
         }
     }
-
 }

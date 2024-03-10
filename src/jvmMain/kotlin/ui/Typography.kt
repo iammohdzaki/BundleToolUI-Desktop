@@ -9,9 +9,9 @@ import androidx.compose.ui.unit.sp
 
 val codeFontFamily = FontFamily(
     Font(resource = "fonts/sans_regular.ttf", weight = FontWeight.Light),
-    Font( resource = "fonts/sans_thin.ttf", weight = FontWeight.Normal),
-    Font( resource = "fonts/sans_medium.ttf", weight = FontWeight.Medium),
-    Font( resource = "fonts/sans_bold.ttf", weight = FontWeight.Bold)
+    Font(resource = "fonts/sans_thin.ttf", weight = FontWeight.Normal),
+    Font(resource = "fonts/sans_medium.ttf", weight = FontWeight.Medium),
+    Font(resource = "fonts/sans_bold.ttf", weight = FontWeight.Bold)
 )
 
 val typography = Typography(

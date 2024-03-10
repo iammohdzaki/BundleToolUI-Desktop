@@ -2,9 +2,18 @@ package ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,11 +51,11 @@ fun ChooseFileTextField(value: String, label: String, onSelect: () -> Unit) {
                 Text(
                     text = label,
                     style = Styles.TextStyleMedium(16.sp),
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Medium
                 )
             },
             textStyle = Styles.TextStyleMedium(16.sp),
-            onValueChange = {},
+            onValueChange = {}
         )
         Button(
             onClick = {
@@ -54,11 +63,11 @@ fun ChooseFileTextField(value: String, label: String, onSelect: () -> Unit) {
             },
             modifier = Modifier
                 .height(50.dp)
-                .wrapContentWidth(),
+                .wrapContentWidth()
         ) {
             Icon(
                 painter = useResource("open_folder.svg") { loadSvgPainter(it, density) },
-                contentDescription = "",
+                contentDescription = ""
             )
         }
     }

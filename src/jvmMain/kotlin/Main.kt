@@ -1,8 +1,28 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,26 +36,35 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import androidx.compose.ui.window.AwtWindow
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import command.CommandBuilder
+import command.CommandExecutor
 import local.FileStorageHelper
 import ui.Styles
+import ui.components.ButtonWithToolTip
 import ui.components.CheckboxWithText
 import ui.components.ChooseFileTextField
 import ui.components.CustomTextField
-import utils.*
+import ui.components.LoadingDialog
+import utils.Constant
+import utils.DBConstants
+import utils.FileDialogType
+import utils.FileHelper
+import utils.Log
+import utils.SigningMode
+import utils.Strings
 import java.awt.Desktop
 import java.awt.FileDialog
 import java.awt.Frame
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.net.URI
-import utils.Strings
 
 @Composable
 @Preview
-fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
+fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: String?) {
     val density = LocalDensity.current // to calculate the intrinsic size of vector images (SVG, XML)
     val coroutineScope = rememberCoroutineScope()
     var logs by remember { mutableStateOf("") }
@@ -57,21 +86,60 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
     var keyPassword by remember { mutableStateOf("") }
     var isAutoUnzip by remember { mutableStateOf(true) }
     var savedJarPath by remember { mutableStateOf(savedPath) }
+    var isAdbSetupDone by remember { mutableStateOf(false) }
+    var adbPath by remember { mutableStateOf("") }
+    var showLoadingDialog by remember { mutableStateOf(Pair("", false)) }
+    var isDeviceIdEnabled by remember { mutableStateOf(false) }
+    var deviceSerialId by remember { mutableStateOf("") }
 
-
-    //TODO: KNOWN ISSUE - Can't update file path once saved, For now Delete path.kb file inside storage directory.
+    // TODO: (Fixed this issue need to test more!) - Can't update file path once saved, For now Delete path.kb file inside storage directory.
     savedJarPath?.let {
         bundletoolPath = it
         saveJarPath = true
     }
 
+    // Check if ADB Setup is Done or Not
+    adbSavedPath?.let {
+        adbPath = it
+        isAdbSetupDone = true
+    }
+
     if (isOpen && !isLoading) {
         FileDialog { fileName, directory ->
             isOpen = false
+            if (fileName.isNullOrEmpty() || directory.isNullOrEmpty()) {
+                return@FileDialog
+            }
             when (fileDialogType) {
-                FileDialogType.BUNDLETOOL -> bundletoolPath = "${directory}$fileName"
-                FileDialogType.AAPT2 -> aapt2Path = "${directory}$fileName"
-                FileDialogType.KEY_STORE_PATH -> keyStorePath = "${directory}$fileName"
+                FileDialogType.BUNDLETOOL -> bundletoolPath = "$directory$fileName"
+                FileDialogType.AAPT2 -> aapt2Path = "$directory$fileName"
+                FileDialogType.KEY_STORE_PATH -> keyStorePath = "$directory$fileName"
+                FileDialogType.ADB_PATH -> {
+                    adbPath = "$directory$fileName"
+                    // Show Loading Here
+                    showLoadingDialog = Pair(Strings.VERIFYING_ADB_PATH, true)
+                    CommandExecutor().executeCommand(
+                        CommandBuilder()
+                            .verifyAdbPath(true, adbPath)
+                            .getAdbVerifyCommand(), coroutineScope,
+                        onSuccess = {
+                            logs += it
+                            isAdbSetupDone = true
+                            Log.i("Saving Path in DB $adbPath")
+                            fileStorageHelper.save(DBConstants.ADB_PATH, adbPath)
+                            // Hide Loading
+                            Thread.sleep(1000L)
+                            showLoadingDialog = Pair(Strings.VERIFYING_ADB_PATH, false)
+                        },
+                        onFailure = {
+                            logs += it
+                            isAdbSetupDone = false
+                            // Hide Loading
+                            showLoadingDialog = Pair(Strings.VERIFYING_ADB_PATH, false)
+                        }
+                    )
+                }
+
                 else -> {
                     aabFilePath = Pair(directory, fileName)
                 }
@@ -79,9 +147,13 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
         }
     }
 
+    if (showLoadingDialog.second) {
+        LoadingDialog(showLoadingDialog.first)
+    }
+
     if (isExecute) {
         isExecute = false
-        //Get Command to Execute
+        // Get Command to Execute
         val (cmd, isValid) = CommandBuilder()
             .bundletoolPath(bundletoolPath)
             .aabFilePath(aabFilePath)
@@ -97,24 +169,13 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
             .validateAndGetCommand()
         if (isValid) {
             Log.i("Command $cmd")
-            logs += "Executing Command : \n$cmd\n"
-            coroutineScope.launch(Dispatchers.IO) {
-                val runtime = Runtime.getRuntime()
-                val startTime = System.currentTimeMillis()
-                try {
-                    //Launch Runtime to execute command
-                    val process = runtime.exec(cmd)
-                    // Read and log error output
-                    val errorReader = BufferedReader(InputStreamReader(process.errorStream))
-                    Log.i("Process Error Output:")
-                    while (errorReader.readLine().also { logs += "\n ERROR -> $it" } != null) {
-                        isLoading = false
-                    }
-                    process.waitFor()
-                    val endTime = System.currentTimeMillis()
-                    if (process.exitValue() == 0) {
-                        Log.i("Command Executed in ${((endTime - startTime) / 1000)}s")
-                        logs += "\nCommand Executed in ${((endTime - startTime) / 1000)}s\n"
+            // logs += "Executing Command : \n$cmd\n"
+            CommandExecutor()
+                .executeCommand(
+                    cmd,
+                    coroutineScope,
+                    onSuccess = {
+                        logs += "$it\n"
                         // Do further file operation after new apks is generated
                         // From Auto Zip you can control further file operations.
                         if (isAutoUnzip) {
@@ -128,8 +189,8 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                             isLoading = false
                         }
 
-                        //Save Path in Storage
-                        //If We don't have any saved path in file storage and save jar path option is checked.Then,we can save new value in storage.
+                        // Save Path in Storage
+                        // If We don't have any saved path in file storage and save jar path option is checked.Then,we can save new value in storage.
                         if (savedJarPath == null && saveJarPath) {
                             fileStorageHelper.save("path", bundletoolPath)
                         }
@@ -140,12 +201,12 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                             if (fileStorageHelper.delete("path"))
                                 saveJarPath = false
                         }
+                    },
+                    onFailure = {
+                        isLoading = false
+                        logs += "Failed -> ${it.printStackTrace()}"
                     }
-                } catch (e: Exception) {
-                    isLoading = false
-                    logs += "Failed -> ${e.printStackTrace()}"
-                }
-            }
+                )
         } else {
             Log.i("Error $cmd")
             logs += "\nError -> $cmd"
@@ -158,20 +219,33 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
-
             Spacer(modifier = Modifier.padding(12.dp))
-            Text(
-                text = Strings.APP_NAME,
-                style = Styles.TextStyleBold(28.sp),
-                modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
-            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = Strings.APP_NAME,
+                    style = Styles.TextStyleBold(28.sp),
+                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
+                )
+                ButtonWithToolTip(
+                    if (isAdbSetupDone) Strings.ABD_SETUP_DONE else Strings.SETUP_ADB,
+                    onClick = {
+                        fileDialogType = FileDialogType.ADB_PATH
+                        isOpen = true
+                    },
+                    Strings.SETUP_ADB_INFO,
+                    icon = if (isAdbSetupDone) "done" else "info"
+                )
+            }
             Spacer(modifier = Modifier.padding(8.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.wrapContentSize(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                //Bundle tool select flow
+                // Bundle tool select flow
                 ChooseFileTextField(
                     bundletoolPath,
                     Strings.SELECT_BUNDLETOOL_JAR,
@@ -348,6 +422,56 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                 Strings.AUTO_UNZIP
             )
             Spacer(modifier = Modifier.padding(8.dp))
+            if (isAdbSetupDone) {
+                Text(
+                    text = Strings.DEVICE_OPTIONS,
+                    style = Styles.TextStyleBold(16.sp),
+                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
+                )
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CheckboxWithText(
+                        Strings.DEVICE_ID,
+                        isDeviceIdEnabled,
+                        onCheckedChange = {
+                            isDeviceIdEnabled = it
+                        },
+                        Strings.DEVICE_ID_INFO
+                    )
+                    if (isDeviceIdEnabled) {
+                        CustomTextField(
+                            deviceSerialId,
+                            Strings.SERIAL_ID,
+                            forPassword = false,
+                            onValueChange = {
+                                deviceSerialId = it
+                            }
+                        )
+                        ButtonWithToolTip(
+                            Strings.FETCH_DEVICES,
+                            onClick = {
+                                CommandExecutor()
+                                    .executeCommand(
+                                        CommandBuilder()
+                                            .getAdbFetchCommand(adbSavedPath!!),
+                                        coroutineScope,
+                                        onSuccess = {
+                                            logs += it
+                                        },
+                                        onFailure = {
+                                            logs += it.printStackTrace()
+                                        }
+                                    )
+                            },
+                            Strings.FETCH_DEVICES_INFO,
+                            icon = "device_fetch"
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.padding(8.dp))
+            }
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(size = 40.dp)
@@ -361,13 +485,13 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                         isExecute = true
                     },
                     modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
-                        .wrapContentWidth(),
+                        .wrapContentWidth()
                 ) {
                     Text(
                         text = Strings.EXECUTE,
                         style = Styles.TextStyleMedium(16.sp),
                         color = Color.White,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -385,17 +509,17 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                     modifier = Modifier.padding(end = 0.dp, bottom = 8.dp),
                     onClick = {
                         logs = ""
-                    },
+                    }
                 ) {
                     Text(
                         text = Strings.CLEAR_LOGS,
-                        style = Styles.TextStyleBold(13.sp),
+                        style = Styles.TextStyleBold(13.sp)
                     )
                     Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
                     Icon(
                         painter = useResource("clear.svg") { loadSvgPainter(it, density) },
                         contentDescription = "Clear",
-                        modifier = Modifier.size(ButtonDefaults.IconSize),
+                        modifier = Modifier.size(ButtonDefaults.IconSize)
                     )
                 }
             }
@@ -403,7 +527,7 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
                 modifier = Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 value = logs,
                 textStyle = Styles.TextStyleMedium(16.sp),
-                onValueChange = {},
+                onValueChange = {}
             )
         }
     }
@@ -412,7 +536,7 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?) {
 @Composable
 private fun FileDialog(
     parent: Frame? = null,
-    onCloseRequest: (fileName: String, directory: String) -> Unit
+    onCloseRequest: (fileName: String?, directory: String?) -> Unit
 ) = AwtWindow(
     create = {
         object : FileDialog(parent, Strings.CHOOSE_FILE, LOAD) {
@@ -427,20 +551,20 @@ private fun FileDialog(
     dispose = FileDialog::dispose
 )
 
-
 fun main() = application {
     val fileStorageHelper = FileStorageHelper()
-    //Check if path for bundletool exists in local storage
-    val path = fileStorageHelper.read("path") as String?
+    // Check if path for bundletool exists in local storage
+    val path = fileStorageHelper.read(DBConstants.BUNDLETOOL_PATH) as String?
+    val adbPath = fileStorageHelper.read(DBConstants.ADB_PATH) as String?
     Log.showLogs = true
     Window(
         onCloseRequest = ::exitApplication,
         state = rememberWindowState(
-            width = 1000.dp, height = 1000.dp,
+            width = 1200.dp, height = 1000.dp,
             position = WindowPosition(Alignment.Center)
         ),
         title = Strings.APP_NAME
     ) {
-        App(fileStorageHelper, path)
+        App(fileStorageHelper, path, adbPath)
     }
 }

@@ -12,7 +12,10 @@ object FileHelper {
             Log.i("CHANGED NAME\n Unzipping...")
             try {
                 FileUtils.unzip(newFile, directory)
-                fileStatus.invoke(Constant.SUCCESS, "Rename and Unzip Successful\nFile Saved at ${directory.removeSuffix("\\")}.")
+                fileStatus.invoke(
+                    Constant.SUCCESS,
+                    "Rename and Unzip Successful\nFile Saved at ${directory.removeSuffix("\\")}."
+                )
                 Log.i("TRYING DELETING FILE")
                 val value = FileUtils.deleteFile(newFile)
                 Log.i("DELETE STATUS : $value")
@@ -25,5 +28,4 @@ object FileHelper {
             fileStatus.invoke(Constant.FAILURE, "FAILED RENAMING THE FILE!!")
         }
     }
-
 }
