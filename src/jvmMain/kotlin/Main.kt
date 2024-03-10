@@ -43,8 +43,6 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import command.CommandBuilder
 import command.CommandExecutor
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import local.FileStorageHelper
 import ui.Styles
 import ui.components.ButtonWithToolTip
@@ -58,13 +56,11 @@ import utils.FileDialogType
 import utils.FileHelper
 import utils.Log
 import utils.SigningMode
+import utils.Strings
 import java.awt.Desktop
 import java.awt.FileDialog
 import java.awt.Frame
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.net.URI
-import utils.Strings
 
 @Composable
 @Preview
@@ -171,24 +167,13 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
             .validateAndGetCommand()
         if (isValid) {
             Log.i("Command $cmd")
-            logs += "Executing Command : \n$cmd\n"
-            coroutineScope.launch(Dispatchers.IO) {
-                val runtime = Runtime.getRuntime()
-                val startTime = System.currentTimeMillis()
-                try {
-                    // Launch Runtime to execute command
-                    val process = runtime.exec(cmd)
-                    // Read and log error output
-                    val errorReader = BufferedReader(InputStreamReader(process.errorStream))
-                    Log.i("Process Error Output:")
-                    while (errorReader.readLine().also { logs += "\n ERROR -> $it" } != null) {
-                        isLoading = false
-                    }
-                    process.waitFor()
-                    val endTime = System.currentTimeMillis()
-                    if (process.exitValue() == 0) {
-                        Log.i("Command Executed in ${((endTime - startTime) / 1000)}s")
-                        logs += "\nCommand Executed in ${((endTime - startTime) / 1000)}s\n"
+            // logs += "Executing Command : \n$cmd\n"
+            CommandExecutor()
+                .executeCommand(
+                    cmd,
+                    coroutineScope,
+                    onSuccess = {
+                        logs += "$it\n"
                         // Do further file operation after new apks is generated
                         // From Auto Zip you can control further file operations.
                         if (isAutoUnzip) {
@@ -214,12 +199,12 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                             if (fileStorageHelper.delete("path"))
                                 saveJarPath = false
                         }
+                    },
+                    onFailure = {
+                        isLoading = false
+                        logs += "Failed -> ${it.printStackTrace()}"
                     }
-                } catch (e: Exception) {
-                    isLoading = false
-                    logs += "Failed -> ${e.printStackTrace()}"
-                }
-            }
+                )
         } else {
             Log.i("Error $cmd")
             logs += "\nError -> $cmd"
