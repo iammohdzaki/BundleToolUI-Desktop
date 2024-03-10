@@ -56,6 +56,7 @@ class CommandBuilderTest {
             .keyAlias("keyAlias")
             .keyPassword("keyPassword")
             .isUniversalMode(false).validateAndGetCommand()
+        println(result)
         assertEquals(
             "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" --ks=/path/to/keystore.jks --ks-pass=pass:keystorePassword --ks-key-alias=keyAlias --key-pass=pass:keyPassword ",
             result.first
@@ -71,6 +72,7 @@ class CommandBuilderTest {
             .signingMode(SigningMode.DEBUG)
             .isUniversalMode(false)
             .validateAndGetCommand()
+        println(result)
         assertEquals(
             "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" ",
             result.first
@@ -93,6 +95,7 @@ class CommandBuilderTest {
             .aabFilePath(Pair("/path/to/", "file.aab"))
             .isUniversalMode(true)
             .validateAndGetCommand()
+        println(result)
         assertEquals(
             "java -jar \"bundletool.jar\" build-apks --mode=universal --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" ",
             result.first
@@ -107,8 +110,44 @@ class CommandBuilderTest {
             .aabFilePath(Pair("/path/to/", "file.aab"))
             .isOverwrite(true)
             .isUniversalMode(false).validateAndGetCommand()
+        println(result)
         assertEquals(
             "java -jar \"bundletool.jar\" build-apks --overwrite --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" ",
+            result.first
+        )
+        assertEquals(true, result.second)
+    }
+
+    @Test
+    fun `validateAndGetCommand should return error when device id enabled but serial id is empty`() {
+        val result = CommandBuilder()
+            .bundletoolPath("bundletool.jar")
+            .aabFilePath(Pair("/path/to/", "file.aab"))
+            .isOverwrite(false)
+            .isUniversalMode(false)
+            .isDeviceSerialIdEnabled(true)
+            .adbSerialId("")
+            .validateAndGetCommand()
+        assertEquals(
+            "Invalid Serial ID",
+            result.first
+        )
+        assertEquals(false, result.second)
+    }
+
+    @Test
+    fun `validateAndGetCommand should return valid command with device id enabled`() {
+        val result = CommandBuilder()
+            .bundletoolPath("bundletool.jar")
+            .aabFilePath(Pair("/path/to/", "file.aab"))
+            .isOverwrite(false)
+            .isUniversalMode(false)
+            .isDeviceSerialIdEnabled(true)
+            .adbSerialId("RZCWC0EZLEH")
+            .validateAndGetCommand()
+        println(result)
+        assertEquals(
+            "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" --device-id=RZCWC0EZLEH ",
             result.first
         )
         assertEquals(true, result.second)

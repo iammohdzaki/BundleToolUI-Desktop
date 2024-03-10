@@ -36,6 +36,9 @@ object Strings {
     const val ABD_SETUP_DONE = "Adb Connected"
     const val SETUP_ADB_INFO = "Setup ADB path to create builds based on connected device"
     const val DEVICE_ID = "Device Id"
-    const val DEVICE_ID_INFO = "Device Id based on the Serial Number"
+    const val DEVICE_ID_INFO = "Device Id based on the Serial Number. Use with Mode Universal to get one apk."
     const val VERIFYING_ADB_PATH = "Verifying ADB Path.."
+    const val SERIAL_ID = "Serial Id"
+    const val FETCH_DEVICES = "Fetch Devices"
+    const val FETCH_DEVICES_INFO = "Fetch Connected Devices Info in LogView"
 }

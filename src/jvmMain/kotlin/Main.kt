@@ -89,6 +89,8 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
     var isAdbSetupDone by remember { mutableStateOf(false) }
     var adbPath by remember { mutableStateOf("") }
     var showLoadingDialog by remember { mutableStateOf(Pair("", false)) }
+    var isDeviceIdEnabled by remember { mutableStateOf(false) }
+    var deviceSerialId by remember { mutableStateOf("") }
 
     // TODO: (Fixed this issue need to test more!) - Can't update file path once saved, For now Delete path.kb file inside storage directory.
     savedJarPath?.let {
@@ -420,6 +422,56 @@ fun App(fileStorageHelper: FileStorageHelper, savedPath: String?, adbSavedPath: 
                 Strings.AUTO_UNZIP
             )
             Spacer(modifier = Modifier.padding(8.dp))
+            if (isAdbSetupDone) {
+                Text(
+                    text = Strings.DEVICE_OPTIONS,
+                    style = Styles.TextStyleBold(16.sp),
+                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
+                )
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CheckboxWithText(
+                        Strings.DEVICE_ID,
+                        isDeviceIdEnabled,
+                        onCheckedChange = {
+                            isDeviceIdEnabled = it
+                        },
+                        Strings.DEVICE_ID_INFO
+                    )
+                    if (isDeviceIdEnabled) {
+                        CustomTextField(
+                            deviceSerialId,
+                            Strings.SERIAL_ID,
+                            forPassword = false,
+                            onValueChange = {
+                                deviceSerialId = it
+                            }
+                        )
+                        ButtonWithToolTip(
+                            Strings.FETCH_DEVICES,
+                            onClick = {
+                                CommandExecutor()
+                                    .executeCommand(
+                                        CommandBuilder()
+                                            .getAdbFetchCommand(adbSavedPath!!),
+                                        coroutineScope,
+                                        onSuccess = {
+                                            logs += it
+                                        },
+                                        onFailure = {
+                                            logs += it.printStackTrace()
+                                        }
+                                    )
+                            },
+                            Strings.FETCH_DEVICES_INFO,
+                            icon = "device_fetch"
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.padding(8.dp))
+            }
             if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(size = 40.dp)
