@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadSvgPainter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -556,8 +557,10 @@ fun main() = application {
     // Check if path for bundletool exists in local storage
     val path = fileStorageHelper.read(DBConstants.BUNDLETOOL_PATH) as String?
     val adbPath = fileStorageHelper.read(DBConstants.ADB_PATH) as String?
+    val icon = painterResource("launcher.png")
     Log.showLogs = true
     Window(
+        icon = icon,
         onCloseRequest = ::exitApplication,
         state = rememberWindowState(
             width = 1200.dp, height = 1000.dp,

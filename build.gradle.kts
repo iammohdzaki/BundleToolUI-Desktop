@@ -42,7 +42,17 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "AabToApk"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.4"
+            val iconsRoot = project.file("desktop-icons")
+            macOS{
+                iconFile.set(iconsRoot.resolve("launcher.icns"))
+            }
+            windows{
+                iconFile.set(iconsRoot.resolve("launcher.ico"))
+            }
+            linux{
+                iconFile.set(iconsRoot.resolve("launcher.png"))
+            }
         }
     }
 }
