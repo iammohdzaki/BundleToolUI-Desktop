@@ -3,6 +3,7 @@ package command
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import utils.SigningMode
+import utils.Utils
 
 class CommandBuilderTest {
 
@@ -57,10 +58,17 @@ class CommandBuilderTest {
             .keyPassword("keyPassword")
             .isUniversalMode(false).validateAndGetCommand()
         println(result)
-        assertEquals(
-            "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" --ks=/path/to/keystore.jks --ks-pass=pass:keystorePassword --ks-key-alias=keyAlias --key-pass=pass:keyPassword ",
-            result.first
-        )
+        if (Utils.isWindowsOS()) {
+            assertEquals(
+                "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" --ks=/path/to/keystore.jks --ks-pass=pass:keystorePassword --ks-key-alias=keyAlias --key-pass=pass:keyPassword ",
+                result.first
+            )
+        } else {
+            assertEquals(
+                "java -jar bundletool.jar build-apks --bundle=/path/to/file.aab --output=/path/to/file.apks --ks=/path/to/keystore.jks --ks-pass=pass:keystorePassword --ks-key-alias=keyAlias --key-pass=pass:keyPassword ",
+                result.first
+            )
+        }
         assertEquals(true, result.second)
     }
 
@@ -73,10 +81,17 @@ class CommandBuilderTest {
             .isUniversalMode(false)
             .validateAndGetCommand()
         println(result)
-        assertEquals(
-            "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" ",
-            result.first
-        )
+        if (Utils.isWindowsOS()) {
+            assertEquals(
+                "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" ",
+                result.first
+            )
+        } else {
+            assertEquals(
+                "java -jar bundletool.jar build-apks --bundle=/path/to/file.aab --output=/path/to/file.apks ",
+                result.first
+            )
+        }
         assertEquals(true, result.second)
     }
 
@@ -85,7 +100,8 @@ class CommandBuilderTest {
         val result = CommandBuilder()
             .verifyAdbPath(true, "/path/to/adb")
             .getAdbVerifyCommand()
-        assertEquals("\"/path/to/adb\" version", result)
+        if (Utils.isWindowsOS()) assertEquals("\"/path/to/adb\" version", result)
+        else assertEquals("/path/to/adb version", result)
     }
 
     @Test
@@ -96,10 +112,17 @@ class CommandBuilderTest {
             .isUniversalMode(true)
             .validateAndGetCommand()
         println(result)
-        assertEquals(
-            "java -jar \"bundletool.jar\" build-apks --mode=universal --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" ",
-            result.first
-        )
+        if (Utils.isWindowsOS()) {
+            assertEquals(
+                "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" --mode=universal ",
+                result.first
+            )
+        } else {
+            assertEquals(
+                "java -jar bundletool.jar build-apks --bundle=/path/to/file.aab --output=/path/to/file.apks --mode=universal ",
+                result.first
+            )
+        }
         assertEquals(true, result.second)
     }
 
@@ -111,10 +134,17 @@ class CommandBuilderTest {
             .isOverwrite(true)
             .isUniversalMode(false).validateAndGetCommand()
         println(result)
-        assertEquals(
-            "java -jar \"bundletool.jar\" build-apks --overwrite --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" ",
-            result.first
-        )
+        if (Utils.isWindowsOS()) {
+            assertEquals(
+                "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" --overwrite ",
+                result.first
+            )
+        } else {
+            assertEquals(
+                "java -jar bundletool.jar build-apks --bundle=/path/to/file.aab --output=/path/to/file.apks --overwrite ",
+                result.first
+            )
+        }
         assertEquals(true, result.second)
     }
 
@@ -146,10 +176,17 @@ class CommandBuilderTest {
             .adbSerialId("RZCWC0EZLEH")
             .validateAndGetCommand()
         println(result)
-        assertEquals(
-            "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" --device-id=RZCWC0EZLEH ",
-            result.first
-        )
+        if (Utils.isWindowsOS()) {
+            assertEquals(
+                "java -jar \"bundletool.jar\" build-apks --bundle=\"/path/to/file.aab\" --output=\"/path/to/file.apks\" --device-id=RZCWC0EZLEH ",
+                result.first
+            )
+        } else {
+            assertEquals(
+                "java -jar bundletool.jar build-apks --bundle=/path/to/file.aab --output=/path/to/file.apks --device-id=RZCWC0EZLEH ",
+                result.first
+            )
+        }
         assertEquals(true, result.second)
     }
 }
