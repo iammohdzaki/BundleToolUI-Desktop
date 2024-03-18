@@ -1,6 +1,8 @@
 package command
 
+import utils.Log
 import utils.SigningMode
+import utils.Utils
 
 class CommandBuilder {
     private var bundletoolPath: String = ""
@@ -39,13 +41,13 @@ class CommandBuilder {
     fun getAdbVerifyCommand(): String {
         val (forVerify, path) = adbVerifyCommandExecute
         if (forVerify) {
-            return "\"${path}\" version"
+            return if (Utils.isWindowsOS()) "\"${path}\" version" else "$path version"
         }
         return ""
     }
 
     fun getAdbFetchCommand(adbPath: String): String {
-        return "\"${adbPath}\" devices"
+        return if (Utils.isWindowsOS()) "\"${adbPath}\" devices" else "$adbPath devices"
     }
 
     fun validateAndGetCommand(): Pair<String, Boolean> {
@@ -69,23 +71,38 @@ class CommandBuilder {
 
     private fun getCommand(): String {
         val commandBuilder = StringBuilder()
-        commandBuilder.append("java -jar \"${bundletoolPath}\" build-apks ")
+        if (Utils.isWindowsOS()) {
+            commandBuilder.append("java -jar \"$bundletoolPath\" build-apks ")
+            if (isAapt2PathEnabled) {
+                commandBuilder.append("--aapt2=\"$aapt2Path\" ")
+            }
+            commandBuilder.append(
+                "--bundle=\"${aabFilePath.first}${aabFilePath.second}\" --output=\"${aabFilePath.first}${
+                    aabFilePath.second.split(
+                        "."
+                    )[0]
+                }.apks\" "
+            )
+        } else {
+            commandBuilder.append("java -jar $bundletoolPath build-apks ")
+            if (isAapt2PathEnabled) {
+                commandBuilder.append("--aapt2=$aapt2Path ")
+            }
+            commandBuilder.append(
+                "--bundle=${aabFilePath.first}${aabFilePath.second} --output=${aabFilePath.first}${
+                    aabFilePath.second.split(
+                        "."
+                    )[0]
+                }.apks "
+            )
+        }
+
         if (isUniversalMode) {
             commandBuilder.append("--mode=universal ")
         }
         if (isOverwrite) {
             commandBuilder.append("--overwrite ")
         }
-        if (isAapt2PathEnabled) {
-            commandBuilder.append("--aapt2=\"$aapt2Path\" ")
-        }
-        commandBuilder.append(
-            "--bundle=\"${aabFilePath.first}${aabFilePath.second}\" --output=\"${aabFilePath.first}${
-                aabFilePath.second.split(
-                    "."
-                )[0]
-            }.apks\" "
-        )
 
         if (signingMode == SigningMode.RELEASE) {
             commandBuilder.append("--ks=$keyStorePath --ks-pass=pass:$keyStorePassword --ks-key-alias=$keyAlias --key-pass=pass:$keyPassword ")
@@ -95,6 +112,7 @@ class CommandBuilder {
             commandBuilder.append("--device-id=$adbSerialId ")
         }
 
+        Log.i("COMMAND_BUILDER -> $commandBuilder")
         return commandBuilder.toString()
     }
 }
