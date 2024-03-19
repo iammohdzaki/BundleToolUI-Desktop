@@ -11,11 +11,12 @@
 [![CodeQL](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/codeql.yml/badge.svg)](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/codeql.yml)
 [![kotlin_lint](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/kotlin_lint.yml/badge.svg)](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/kotlin_lint.yml)
 [![Run Tests](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/workflow.yml/badge.svg)](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/workflow.yml)
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed/iammohdzaki/BundleToolUI-Desktop)
-![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/iammohdzaki/BundleToolUI-Desktop)
-![GitHub Release](https://img.shields.io/github/v/release/iammohdzaki/BundleToolUI-Desktop)
-![GitHub Repo stars](https://img.shields.io/github/stars/iammohdzaki/BundleToolUI-Desktop?style=flat-square)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/iammohdzaki/BundleToolUI-Desktop)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=iammohdzaki_BundleToolUI-Desktop&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=iammohdzaki_BundleToolUI-Desktop)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=iammohdzaki_BundleToolUI-Desktop&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=iammohdzaki_BundleToolUI-Desktop)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=iammohdzaki_BundleToolUI-Desktop&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=iammohdzaki_BundleToolUI-Desktop)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=iammohdzaki_BundleToolUI-Desktop&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=iammohdzaki_BundleToolUI-Desktop)
+[![GitHub Release](https://img.shields.io/github/v/release/iammohdzaki/BundleToolUI-Desktop)](https://github.com/iammohdzaki/BundleToolUI-Desktop/releases)
+[![GitHub Repo stars](https://img.shields.io/github/stars/iammohdzaki/BundleToolUI-Desktop?style=flat-square)](https://github.com/iammohdzaki/BundleToolUI-Desktop/stargazers)
 </div>
 
 <h1 align="center">Android APK to AAB Converter</h1>
@@ -49,7 +50,7 @@ To run BundleToolUI-Desktop on your system, download compressed build based on y
 
 ## CONTRIBUTING
 
-Thank you for considering contributing to AAB to APK Converter! Contributions are welcome and encouraged.
+Thank you for considering contributing to AAB to APK Converter! Contributions are welcome and encouraged. [For More Info](CONTRIBUTING.md)
 
 ## License
 

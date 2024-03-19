@@ -2,6 +2,12 @@
 
 Thank you for considering contributing to our project! We appreciate your efforts to make it better. To ensure smooth collaboration, please follow these guidelines:
 
+## Environment Details
+
+- IDE: IntelliJ IDEA 2023.3.5 (Community Edition)
+- Java SDK: azul-18 (18.0.2)
+- Gradle: 7.5.1
+
 ## Getting Started
 
 1. Fork the repository on GitHub.
