@@ -39,7 +39,7 @@ Bundle Tool UI - Desktop is an open-source tool built with Kotlin and Desktop Co
 * __AAB to APK Conversion__:Convert Android App Bundles (AAB) to Android Package (APK) files.
 * __User Interface__: Simple and intuitive user interface built with Desktop Compose.
 * __Signing Configuration__: Enable users to specify signing information, including debug or release signing, keystore paths, and passwords.
-* __Platform Compatibility__: Cross-platform support for Windows,(not yet) macOS, and Linux.
+* __Platform Compatibility__: Cross-platform support for Windows,macOS, and Linux.
 * __Auto Save Jar Paths__: Enable users to save jar path for future use.
 * __Bundle Tool CLI Options__: Enable users to use CLI options from BundleTool.
 * __ADB Support__: Enable users to configure ADB to generate APKs based on connected device serial id.
