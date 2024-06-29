@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ui.Styles
+import ui.theme.Styles
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

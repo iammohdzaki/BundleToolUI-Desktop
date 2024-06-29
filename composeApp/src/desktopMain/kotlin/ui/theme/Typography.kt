@@ -1,4 +1,4 @@
-package ui
+package ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
@@ -8,10 +8,10 @@ import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.sp
 
 val codeFontFamily = FontFamily(
-    Font(resource = "fonts/sans_regular.ttf", weight = FontWeight.Light),
-    Font(resource = "fonts/sans_thin.ttf", weight = FontWeight.Normal),
-    Font(resource = "fonts/sans_medium.ttf", weight = FontWeight.Medium),
-    Font(resource = "fonts/sans_bold.ttf", weight = FontWeight.Bold)
+    Font(resource = "font/sans_regular.ttf", weight = FontWeight.Light),
+    Font(resource = "font/sans_thin.ttf", weight = FontWeight.Normal),
+    Font(resource = "font/sans_medium.ttf", weight = FontWeight.Medium),
+    Font(resource = "font/sans_bold.ttf", weight = FontWeight.Bold)
 )
 
 val typography = Typography(

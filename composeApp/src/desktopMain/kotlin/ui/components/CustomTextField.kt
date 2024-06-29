@@ -22,7 +22,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ui.Styles
+import ui.theme.Styles
 
 @Composable
 fun CustomTextField(value: String, label: String, forPassword: Boolean = true, onValueChange: (String) -> Unit) {

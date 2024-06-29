@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="composeApp-desktop-1.0-SNAPSHOT">
+    <output-path>$PROJECT_DIR$/composeApp/build/libs</output-path>
+    <root id="archive" name="composeApp-desktop-1.0-SNAPSHOT.jar">
+      <element id="module-output" name="AabToApk.composeApp.desktopMain" />
+    </root>
+  </artifact>
+</component>

@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import ui.Styles
+import ui.theme.Styles
 
 @Composable
 fun LoadingDialog(text: String) {
