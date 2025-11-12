@@ -1,5 +1,6 @@
 package ui.components
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -7,21 +8,27 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material3.Button
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,10 +37,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun LogBox(
@@ -49,44 +56,42 @@ fun LogBox(
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-                shape = RoundedCornerShape(8.dp)
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(10.dp)
             )
-            .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(8.dp))
-            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(10.dp))
     ) {
         // 🔹 Header Row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "Progress Log",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                "📜 Progress Log",
+                style = MaterialTheme.typography.titleSmall.copy(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold
                 )
             )
+
             Spacer(Modifier.weight(1f))
+
             if (onClearLogs != null) {
-                TextButton(
-                    onClick = onClearLogs,
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(
-                        "Clear Logs",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                IconButton(onClick = onClearLogs) {
+                    Icon(
+                        Icons.Default.DeleteSweep,
+                        contentDescription = "Clear Logs",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
 
         HorizontalDivider(
-            Modifier,
-            DividerDefaults.Thickness,
+            thickness = DividerDefaults.Thickness,
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
         )
 
@@ -94,24 +99,27 @@ fun LogBox(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(0.dp))
-                .padding(12.dp)
-                .verticalScroll(scrollState)
+                .height(200.dp)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
-            Text(
-                text = log.ifBlank { "Waiting to start conversion..." },
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontFamily = FontFamily.Monospace
-                ),
-                textAlign = TextAlign.Start
+            // Scrollable content + vertical scrollbar
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(12.dp)
+            ) {
+                LogTextStyled(log)
+            }
+
+            VerticalScrollbar(
+                adapter = rememberScrollbarAdapter(scrollState),
+                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 2.dp)
             )
         }
 
         HorizontalDivider(
-            Modifier,
-            DividerDefaults.Thickness,
+            thickness = DividerDefaults.Thickness,
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
         )
 
@@ -126,9 +134,10 @@ fun LogBox(
             Text(
                 "$",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
                 ),
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = 6.dp)
             )
 
             OutlinedTextField(
@@ -136,14 +145,16 @@ fun LogBox(
                 onValueChange = { command = it },
                 placeholder = { Text("Execute custom command...") },
                 singleLine = true,
-                shape = RoundedCornerShape(6.dp),
-                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .defaultMinSize(minHeight = 44.dp), // ✅ prevents clipping, allows proper padding
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 )
@@ -158,11 +169,62 @@ fun LogBox(
                         command = ""
                     }
                 },
-                modifier = Modifier.height(40.dp),
-                shape = RoundedCornerShape(6.dp)
+                modifier = Modifier.height(44.dp),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Text("Run")
+                Text("Run", style = MaterialTheme.typography.bodyMedium)
             }
+        }
+    }
+}
+
+@Composable
+private fun LogTextStyled(log: String) {
+    val lines = log.trim().split("\n")
+
+    Column {
+        if (lines.isEmpty() || log.isBlank()) {
+            Text(
+                "Waiting to start conversion...",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontFamily = FontFamily.Monospace
+                )
+            )
+            return@Column
+        }
+
+        for (line in lines) {
+            val color = when {
+                line.contains("✅", ignoreCase = true) ||
+                        line.contains("Success", ignoreCase = true) -> MaterialTheme.colorScheme.primary
+
+                line.contains("❌", ignoreCase = true) ||
+                        line.contains("Error", ignoreCase = true) ||
+                        line.contains("Failed", ignoreCase = true) -> MaterialTheme.colorScheme.error
+
+                line.startsWith(">") -> MaterialTheme.colorScheme.tertiary
+
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+            }
+
+            val weight = when {
+                line.contains("✅", ignoreCase = true) ||
+                        line.contains("❌", ignoreCase = true) -> FontWeight.SemiBold
+
+                else -> FontWeight.Normal
+            }
+
+            Text(
+                text = line,
+                color = color,
+                fontWeight = weight,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontFamily = FontFamily.Monospace,
+                    lineHeight = 18.sp
+                )
+            )
         }
     }
 }

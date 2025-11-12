@@ -1,5 +1,7 @@
 package ui.windows
 
+import aabtoapk.composeapp.generated.resources.Res
+import aabtoapk.composeapp.generated.resources.app_name
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,17 +19,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SplashWindow(
-    appName: String = "BundleTool",
-    version: String = "v1.0.0",
+    version: String = "v1.0.4",
     onFinish: () -> Unit = {}
 ) {
 
     LaunchedEffect(Unit) {
         // Simulate initialization delay
-        kotlinx.coroutines.delay(2000)
+        kotlinx.coroutines.delay(1000)
         onFinish()
     }
 
@@ -50,8 +52,8 @@ fun SplashWindow(
             )
             // App title
             Text(
-                text = appName,
-                style = MaterialTheme.typography.displayMedium,
+                text = stringResource(Res.string.app_name),
+                style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Companion.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -60,7 +62,7 @@ fun SplashWindow(
                 text = version,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Companion.Medium,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.headlineSmall
             )
             // Loader
             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)

@@ -47,19 +47,29 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.logback.logging)
         }
+        // UI test dependencies for JVM (Compose Desktop)
+        val jvmTest by getting {
+            kotlin.srcDir("build/generated/buildConfig")
+            dependencies {
+                implementation(compose.desktop.uiTestJUnit4)
+                implementation(libs.kotlin.test)
+                implementation(libs.junit)
+            }
+        }
         val jvmMain by getting {
             resources.srcDir("src/jvmMain/composeResources")
         }
     }
 }
 
+version = "1.0.4"
 compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "AabToApk"
-            packageVersion = "1.0.4"
+            packageVersion = project.version.toString()
             val iconsRoot = project.file("desktop-icons")
             macOS{
                 iconFile.set(iconsRoot.resolve("launcher.icns"))
@@ -72,4 +82,43 @@ compose.desktop {
             }
         }
     }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    dependsOn("generateBuildConfig")
+}
+
+abstract class GenerateBuildConfigTask : DefaultTask() {
+
+    @get:Input
+    abstract val appName: Property<String>
+
+    @get:Input
+    abstract val versionName: Property<String>
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val outputFile = outputDir.file("BuildConfig.kt").get().asFile
+        outputFile.parentFile.mkdirs()
+
+        val content = """
+            package build
+
+            object BuildConfig {
+                const val APP_NAME = "${appName.get()}"
+                const val VERSION = "${versionName.get()}"
+            }
+        """.trimIndent()
+
+        outputFile.writeText(content)
+        logger.lifecycle("✅ Generated ${outputFile.path}")
+    }
+}
+tasks.register<GenerateBuildConfigTask>("generateBuildConfig") {
+    appName.set("AabToApk")
+    versionName.set(project.version.toString())
+    outputDir.set(layout.buildDirectory.dir("generated/buildConfig"))
 }

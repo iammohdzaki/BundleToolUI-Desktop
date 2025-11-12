@@ -25,11 +25,13 @@ class CommandUseCase(
             onSuccess = { command ->
                 val execResult = when (val res = executor.execute(command)) {
                     is CommandResult.Success -> {
+                        val outputFile = File(commandBuilder.resolveOutputPath(config))
                         val fileResult = fileManager.handleBundletoolOutput(
-                            directory = File(config.aabPath).parent ?: ".",
-                            fileName = File(config.aabPath).name,
+                            directory = outputFile.parent ?: ".",
+                            fileName = outputFile.name,
                             isUniversal = config.isUniversal
                         )
+
                         when (fileResult) {
                             is FileActionResult.Success -> CommandResult.Success(
                                 "${res.output}\n${fileResult.message}",
@@ -39,12 +41,16 @@ class CommandUseCase(
                             is FileActionResult.Failure -> CommandResult.Failure(fileResult.error)
                         }
                     }
+
                     is CommandResult.Failure -> res
                 }
                 CommandExecutionResult(command, execResult)
             },
             onFailure = {
-                CommandExecutionResult("Invalid command configuration", CommandResult.Failure(it.message ?: "Invalid config"))
+                CommandExecutionResult(
+                    "Invalid command configuration",
+                    CommandResult.Failure(it.message ?: "Invalid config")
+                )
             }
         )
     }

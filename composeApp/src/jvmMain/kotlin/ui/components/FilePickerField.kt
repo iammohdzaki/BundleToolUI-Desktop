@@ -1,6 +1,7 @@
 package ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,8 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import data.model.ClickableText
 import java.awt.FileDialog
 import java.awt.Frame
+import javax.swing.JFileChooser
 
 @Composable
 fun FilePickerField(
@@ -40,14 +42,19 @@ fun FilePickerField(
     clickableText: ClickableText? = null,
     modifier: Modifier = Modifier.fillMaxWidth(),
     fileExtensionFilter: String? = null, // e.g. ".aab" or ".jks",
+    selectFolder: Boolean = false,
     onPick: (String) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
         LaunchedEffect(Unit) {
-            val file = pickFile(dialogTitle, fileExtensionFilter)
-            if (file != null) onPick(file)
+            val path = if (selectFolder)
+                pickFolder(dialogTitle)
+            else
+                pickFile(dialogTitle, fileExtensionFilter)
+
+            if (path != null) onPick(path)
             showDialog = false
         }
     }
@@ -71,7 +78,7 @@ fun FilePickerField(
                 .background(
                     color = MaterialTheme.colorScheme.surfaceContainerHighest,
                     shape = RoundedCornerShape(8.dp)
-                ),
+                ).clickable { showDialog = true },
             verticalAlignment = Alignment.CenterVertically
         ) {
             // File path text
@@ -103,15 +110,11 @@ fun FilePickerField(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                IconButton(
-                    onClick = { showDialog = true }
-                ) {
-                    Icon(
-                        Icons.Default.FolderOpen,
-                        contentDescription = "Browse",
-                        tint = Color.White
-                    )
-                }
+                Icon(
+                    imageVector = if (selectFolder) Icons.Default.Folder else Icons.Default.FolderOpen,
+                    contentDescription = if (selectFolder) "Select Folder" else "Select File",
+                    tint = Color.White
+                )
             }
         }
         clickableText?.let {
@@ -138,6 +141,26 @@ fun pickFile(title: String, extension: String?): String? {
         dialog.file?.let { file ->
             dialog.directory + file
         }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+/**
+ * Opens a native folder picker dialog (works on desktop JVM).
+ */
+fun pickFolder(title: String): String? {
+    return try {
+        val chooser = JFileChooser().apply {
+            dialogTitle = title
+            fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+            isAcceptAllFileFilterUsed = false
+        }
+        val result = chooser.showOpenDialog(null)
+        if (result == JFileChooser.APPROVE_OPTION) {
+            chooser.selectedFile.absolutePath
+        } else null
     } catch (e: Exception) {
         e.printStackTrace()
         null

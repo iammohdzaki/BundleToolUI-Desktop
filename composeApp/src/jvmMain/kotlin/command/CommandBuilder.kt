@@ -2,12 +2,14 @@ package command
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.File
 
 class CommandBuilder(
     private val config: Config
 ) : ICommandBuilder {
 
     val logger = LoggerFactory.getLogger("CommandBuilder") as Logger
+
     data class Config(
         val bundleToolPath: String,
         val aabPath: String,
@@ -28,11 +30,11 @@ class CommandBuilder(
     override fun build(): Result<String> {
         if (config.bundleToolPath.isBlank()) return Result.failure(IllegalArgumentException("BundleTool path missing"))
         if (config.aabPath.isBlank()) return Result.failure(IllegalArgumentException("AAB file path missing"))
-
+        val outputPath = resolveOutputPath(config)
         val cmd = buildString {
             append("java -jar \"${config.bundleToolPath}\" build-apks ")
             append("--bundle=\"${config.aabPath}\" ")
-            append("--output=\"${if(config.outputDir.isNullOrEmpty()) getDefaultOutput() else config.outputDir}\" ")
+            append("--output=\"$outputPath\" ")
             if (config.isUniversal) append("--mode=universal ")
             if (config.overwrite) append("--overwrite ")
             config.keystore?.let {
@@ -48,9 +50,31 @@ class CommandBuilder(
         return Result.success(cmd.trim())
     }
 
-    private fun getDefaultOutput(): String {
-        val base = config.aabPath.substringBeforeLast(".")
-        return "$base.apks"
+    /**
+     * Resolves a valid output file path for the generated .apks.
+     * - If user provided a directory → add default .apks file name.
+     * - If user provided a full file path → use it as-is.
+     * - If not provided → default next to AAB file.
+     */
+    fun resolveOutputPath(config: Config): String {
+        val output = config.outputDir
+        val aabFile = File(config.aabPath)
+        // Use File to join parent and filename so we get platform-correct separators
+        val defaultOutput = File(aabFile.parent, "${aabFile.nameWithoutExtension}.apks").absolutePath
+
+        if (output.isNullOrBlank()) return defaultOutput
+
+        val outputFile = File(output)
+        return when {
+            outputFile.exists() && outputFile.isDirectory ->
+                File(outputFile, "${aabFile.nameWithoutExtension}.apks").absolutePath
+
+            // If user provided a path that ends with a separator, treat it as a directory
+            output.endsWith("/") || output.endsWith("\\") ->
+                File(output, "${aabFile.nameWithoutExtension}.apks").absolutePath
+
+            else -> output
+        }
     }
 
     companion object {
