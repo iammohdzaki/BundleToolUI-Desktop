@@ -9,7 +9,6 @@
 <div align="center">
 
 [![CodeQL](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/codeql.yml/badge.svg)](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/codeql.yml)
-[![kotlin_lint](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/kotlin_lint.yml/badge.svg)](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/kotlin_lint.yml)
 [![Run Tests](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/workflow.yml/badge.svg)](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/workflow.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=iammohdzaki_BundleToolUI-Desktop&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=iammohdzaki_BundleToolUI-Desktop)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=iammohdzaki_BundleToolUI-Desktop&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=iammohdzaki_BundleToolUI-Desktop)
