@@ -42,7 +42,6 @@ Bundle Tool UI - Desktop is an open-source tool built with Kotlin and Desktop Co
 * __Platform Compatibility__: Cross-platform support for Windows,macOS, and Linux.
 * __Auto Save Jar Paths__: Enable users to save jar path for future use.
 * __Bundle Tool CLI Options__: Enable users to use CLI options from BundleTool.
-* __ADB Support__: Enable users to configure ADB to generate APKs based on connected device serial id.
 
 ## Getting Started
 
