@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="app_name">BundleTool Desktop</string>
+    <string name="title">AAB to APK Converter</string>
+    <string name="subtitle">Convert Android App Bundles to various APK formats with ease.</string>
+    <string name="step_one_title">1. Select Android App Bundle (.aab)</string>
+    <string name="no_aab_selected">No AAB file selected</string>
+    <string name="step_two_title">2. Choose BundleTool Executable</string>
+    <string name="bundletool_not_selected">Bundle Tool not selected</string>
+    <string name="download_bundletool">Download BundleTool</string>
+    <string name="step_three_title">3. Choose Output Mode</string>
+    <string name="universal_apk">Universal APK</string>
+    <string name="apk_set">APK Set (.apks)</string>
+    <string name="device_specific">Device-specific</string>
+    <string name="step_four_title">4. Output Directory (optional)</string>
+    <string name="step_four_subtitle">Leave empty for same directory as .aab</string>
+</resources>

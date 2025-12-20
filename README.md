@@ -9,7 +9,6 @@
 <div align="center">
 
 [![CodeQL](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/codeql.yml/badge.svg)](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/codeql.yml)
-[![kotlin_lint](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/kotlin_lint.yml/badge.svg)](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/kotlin_lint.yml)
 [![Run Tests](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/workflow.yml/badge.svg)](https://github.com/iammohdzaki/BundleToolUI-Desktop/actions/workflows/workflow.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=iammohdzaki_BundleToolUI-Desktop&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=iammohdzaki_BundleToolUI-Desktop)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=iammohdzaki_BundleToolUI-Desktop&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=iammohdzaki_BundleToolUI-Desktop)
@@ -42,7 +41,6 @@ Bundle Tool UI - Desktop is an open-source tool built with Kotlin and Desktop Co
 * __Platform Compatibility__: Cross-platform support for Windows,macOS, and Linux.
 * __Auto Save Jar Paths__: Enable users to save jar path for future use.
 * __Bundle Tool CLI Options__: Enable users to use CLI options from BundleTool.
-* __ADB Support__: Enable users to configure ADB to generate APKs based on connected device serial id.
 
 ## Getting Started
 
