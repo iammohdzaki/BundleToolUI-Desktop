@@ -62,7 +62,7 @@ kotlin {
     }
 }
 
-version = "1.0.4"
+version = "1.0.7"
 compose.desktop {
     application {
         mainClass = "MainKt"
