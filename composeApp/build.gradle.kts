@@ -68,7 +68,7 @@ kotlin {
     }
 }
 
-version = "1.0.7"
+version = "2.0.0"
 compose.desktop {
     application {
         mainClass = "MainKt"
@@ -77,7 +77,7 @@ compose.desktop {
             packageName = "AabToApk"
             packageVersion = project.version.toString()
             val iconsRoot = project.file("desktop-icons")
-            macOS{
+            macOS {
                 iconFile.set(iconsRoot.resolve("launcher.icns"))
             }
             windows{
