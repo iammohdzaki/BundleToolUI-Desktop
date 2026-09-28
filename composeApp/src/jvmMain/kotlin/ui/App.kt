@@ -16,7 +16,6 @@ import org.koin.compose.KoinContext
 import ui.navigation.AppNavHost
 import ui.theme.AppTheme
 
-@Preview
 @Composable
 fun App(onCloseWindow: () -> Unit) {
     KoinContext {

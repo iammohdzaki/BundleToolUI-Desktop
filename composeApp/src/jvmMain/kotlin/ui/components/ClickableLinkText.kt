@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun ClickableLinkText(
     text: String,
-    url: String,
+    url: String? = null,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     highlightColor: Color = MaterialTheme.colorScheme.primary,
     textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp)
@@ -34,12 +35,14 @@ fun ClickableLinkText(
             start = 0,
             end = text.length
         )
-        addStringAnnotation(
-            tag = "URL",
-            annotation = url,
-            start = 0,
-            end = text.length
-        )
+        if (url != null) {
+            addStringAnnotation(
+                tag = "URL",
+                annotation = url,
+                start = 0,
+                end = text.length
+            )
+        }
     }
 
     Text(
@@ -47,10 +50,16 @@ fun ClickableLinkText(
         style = textStyle,
         modifier = modifier
             .clickable {
-                annotatedText.getStringAnnotations("URL", 0, text.length)
-                    .firstOrNull()?.let {
-                        uriHandler.openUri(it.item)
-                    }
+                if (onClick != null) {
+                    onClick()
+                } else {
+                    annotatedText.getStringAnnotations("URL", 0, text.length)
+                        .firstOrNull()?.let {
+                            if (it.item.isNotEmpty()) {
+                                uriHandler.openUri(it.item)
+                            }
+                        }
+                }
             }
     )
 }

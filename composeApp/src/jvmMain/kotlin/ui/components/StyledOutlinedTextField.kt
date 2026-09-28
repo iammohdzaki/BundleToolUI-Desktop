@@ -30,16 +30,25 @@ fun StyledOutlinedTextField(
     onValueChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    readOnly: Boolean = false,
+    enabled: Boolean = true,
+    supportingText: String? = null,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(placeholder) },
-        placeholder = { Text(placeholder) },
+        label = { Text(placeholder, style = MaterialTheme.typography.bodyMedium) },
+        placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium) },
+        supportingText = supportingText?.let {
+            { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall) }
+        },
         singleLine = true,
+        readOnly = readOnly,
+        enabled = enabled,
         modifier = modifier
             .clip(RoundedCornerShape(8.dp)),
         shape = RoundedCornerShape(8.dp),
@@ -74,6 +83,8 @@ fun StyledOutlinedTextField(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            } else if (trailingIcon != null) {
+                trailingIcon()
             }
         },
         colors = OutlinedTextFieldDefaults.colors(

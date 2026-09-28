@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import androidx.compose.material3.Text
 
 class UiComponentsTest {
 
@@ -65,7 +66,7 @@ class UiComponentsTest {
     @Test
     fun `DottedBorderBox shows content inside`() {
         composeTestRule.setContent {
-            DottedBorderBox { androidx.compose.material3.Text("Inner Content") }
+            DottedBorderBox { Text("Inner Content") }
         }
         composeTestRule.onNodeWithText("Inner Content").assertIsDisplayed()
     }

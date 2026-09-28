@@ -15,6 +15,13 @@ import utils.files.IFileUtils
 
 fun viewModelModules() = module {
     viewModel { HomeViewModel(get(), get()) }
+    viewModel { ui.windows.viewmodel.ExtractApksViewModel(get(), get()) }
+    viewModel { ui.windows.viewmodel.SettingsViewModel(get()) }
+    single { ui.windows.viewmodel.SplashViewModel(get()) }
+    viewModel { ui.windows.viewmodel.InstallApksViewModel(get(), get()) }
+    viewModel { ui.windows.viewmodel.GetDeviceSpecViewModel(get(), get()) }
+    viewModel { ui.windows.viewmodel.GetSizeViewModel(get(), get()) }
+    viewModel { ui.windows.viewmodel.McpViewModel(get(), get()) }
 }
 
 fun storageModules() = module {
@@ -28,6 +35,7 @@ fun commandModules() = module {
     single<ICommandExecutor> { OSProcessExecutor() }
     single<IFileUtils> { FileUtilsImpl }
     single { FileOperationManager(get()) }
+    single { manager.AdbManager(get(), get()) }
 
     // Use Case layer
     single { CommandUseCase(get(), get()) }

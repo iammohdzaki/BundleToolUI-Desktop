@@ -43,13 +43,18 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+            
+            // Ktor Client Engine
             implementation(libs.ktor.client.cio)
+            
+            // MCP Server module
+            implementation(project(":mcp-server"))
+            
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.logback.logging)
         }
         // UI test dependencies for JVM (Compose Desktop)
         val jvmTest by getting {
-            kotlin.srcDir("build/generated/buildConfig")
             dependencies {
                 implementation(compose.desktop.uiTestJUnit4)
                 implementation(libs.kotlin.test)
@@ -57,12 +62,13 @@ kotlin {
             }
         }
         val jvmMain by getting {
+            kotlin.srcDir("build/generated/buildConfig")
             resources.srcDir("src/jvmMain/composeResources")
         }
     }
 }
 
-version = "1.0.7"
+version = "2.0.0"
 compose.desktop {
     application {
         mainClass = "MainKt"
@@ -71,7 +77,7 @@ compose.desktop {
             packageName = "AabToApk"
             packageVersion = project.version.toString()
             val iconsRoot = project.file("desktop-icons")
-            macOS{
+            macOS {
                 iconFile.set(iconsRoot.resolve("launcher.icns"))
             }
             windows{

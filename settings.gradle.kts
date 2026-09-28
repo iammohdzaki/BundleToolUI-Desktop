@@ -32,5 +32,6 @@ plugins {
 }
 
 include(":composeApp")
+include(":mcp-server")
 rootProject.name = "AabToApk"
 

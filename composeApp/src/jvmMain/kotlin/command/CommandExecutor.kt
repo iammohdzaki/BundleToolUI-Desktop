@@ -16,10 +16,15 @@ class CommandExecutor {
     ) {
         coroutineScope.launch(Dispatchers.IO) {
             try {
-                val runtime = Runtime.getRuntime()
                 val startTime = System.currentTimeMillis()
 
-                val process = runtime.exec(cmd)
+                val isWindows = System.getProperty("os.name").lowercase().contains("windows")
+                val process = if (isWindows) {
+                    ProcessBuilder("cmd.exe", "/c", cmd).start()
+                } else {
+                    ProcessBuilder("sh", "-c", cmd).start()
+                }
+                
                 val outputReader = BufferedReader(InputStreamReader(process.inputStream))
                 val errorReader = BufferedReader(InputStreamReader(process.errorStream))
 
