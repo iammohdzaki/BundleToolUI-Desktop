@@ -15,15 +15,15 @@ jobs:
         include:
           - os: ubuntu-latest
             format: deb
-            task: packageDistributionForLinux
+            task: packageDistributionForCurrentOS
             ext: deb
           - os: macos-latest
             format: dmg
-            task: packageDistributionForMac
+            task: packageDistributionForCurrentOS
             ext: dmg
           - os: windows-latest
             format: msi
-            task: packageDistributionForWindows
+            task: packageDistributionForCurrentOS
             ext: msi
 
     steps:
