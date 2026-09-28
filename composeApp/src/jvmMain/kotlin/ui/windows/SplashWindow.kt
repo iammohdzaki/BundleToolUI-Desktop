@@ -35,7 +35,6 @@ import ui.windows.viewmodel.SplashViewModel
 @Composable
 fun SplashWindow(
     viewModel: SplashViewModel,
-    version: String = "v1.0.4",
     onFinish: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()

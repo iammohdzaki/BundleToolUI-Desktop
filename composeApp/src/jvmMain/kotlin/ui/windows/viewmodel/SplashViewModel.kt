@@ -10,9 +10,10 @@ import kotlinx.coroutines.launch
 import local.AppPreferences
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.FileOutputStream
-import java.net.HttpURLConnection
-import java.net.URL
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.client.plugins.onDownload
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class SplashState {
     CHECKING,
@@ -42,7 +43,7 @@ class SplashViewModel(
     private fun checkBundleTool() {
         viewModelScope.launch {
             // Enforce minimum splash screen duration so it's always visible
-            kotlinx.coroutines.delay(1500)
+            kotlinx.coroutines.delay(500.milliseconds)
             
             val config = appPreferences.getBundleToolConfig()
             val path = config?.bundleToolPath
@@ -65,59 +66,51 @@ class SplashViewModel(
                     )
                 }
                 
-                val apiUrl = URL("https://api.github.com/repos/google/bundletool/releases/latest")
-                val connection = apiUrl.openConnection() as HttpURLConnection
-                connection.requestMethod = "GET"
-                connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
-                connection.connectTimeout = 5000 // 5 seconds timeout
-                connection.readTimeout = 5000
-                
-                if (connection.responseCode != HttpURLConnection.HTTP_OK) {
-                    throw Exception("Failed to fetch release info: HTTP ${connection.responseCode}")
-                }
-                
-                val response = connection.inputStream.bufferedReader().use { it.readText() }
-                
-                val urlRegex = "\"browser_download_url\":\\s*\"([^\"]+\\.jar)\"".toRegex()
-                val matchResult = urlRegex.find(response)
-                
-                val downloadUrl = matchResult?.groups?.get(1)?.value ?: throw Exception("Could not find .jar download URL.")
-                val fileName = downloadUrl.substringAfterLast("/")
-                
-                val appDir = File(System.getProperty("user.home"), ".bundletool_ui")
-                if (!appDir.exists()) appDir.mkdirs()
-                
-                val outputFile = File(appDir, fileName)
-                
-                _uiState.update { it.copy(message = "Downloading $fileName...", downloadProgress = 0.1f) }
-                
-                val fileUrl = URL(downloadUrl)
-                val fileConn = fileUrl.openConnection() as HttpURLConnection
-                fileConn.connectTimeout = 5000
-                fileConn.readTimeout = 5000
-                val fileLength = fileConn.contentLength
-                
-                fileConn.inputStream.use { input ->
-                    FileOutputStream(outputFile).use { output ->
-                        val buffer = ByteArray(4096)
-                        var bytesCopied = 0L
-                        var bytesRead: Int
-                        while (input.read(buffer).also { bytesRead = it } != -1) {
-                            output.write(buffer, 0, bytesRead)
-                            bytesCopied += bytesRead
-                            if (fileLength > 0) {
-                                val progress = (bytesCopied.toFloat() / fileLength.toFloat()) * 0.9f + 0.1f
-                                _uiState.update { it.copy(downloadProgress = progress) }
-                            }
-                        }
+                val client = io.ktor.client.HttpClient(io.ktor.client.engine.cio.CIO) {
+                    install(io.ktor.client.plugins.HttpTimeout) {
+                        requestTimeoutMillis = 60000
+                        connectTimeoutMillis = 15000
+                        socketTimeoutMillis = 60000
                     }
                 }
                 
-                val absolutePath = outputFile.absolutePath
-                val config = appPreferences.getBundleToolConfig() ?: data.state.PersistedBundleToolConfig()
-                appPreferences.saveBundleToolConfig(config.copy(bundleToolPath = absolutePath))
-                
-                _uiState.update { it.copy(state = SplashState.DONE) }
+                try {
+                    val response = client.get("https://api.github.com/repos/google/bundletool/releases/latest") {
+                        header("Accept", "application/vnd.github.v3+json")
+                    }.bodyAsText()
+                    
+                    val urlRegex = "\"browser_download_url\":\\s*\"([^\"]+\\.jar)\"".toRegex()
+                    val matchResult = urlRegex.find(response)
+                    
+                    val downloadUrl = matchResult?.groups?.get(1)?.value ?: throw Exception("Could not find .jar download URL.")
+                    val fileName = downloadUrl.substringAfterLast("/")
+                    
+                    val appDir = File(System.getProperty("user.home"), ".bundletool_ui")
+                    if (!appDir.exists()) appDir.mkdirs()
+                    
+                    val outputFile = File(appDir, fileName)
+                    
+                    _uiState.update { it.copy(message = "Downloading $fileName...", downloadProgress = 0.1f) }
+                    
+                    val bytes = client.get(downloadUrl) {
+                        onDownload { bytesSentTotal, contentLength ->
+                            if (contentLength != null && contentLength > 0) {
+                                val progress = (bytesSentTotal.toFloat() / contentLength.toFloat()) * 0.9f + 0.1f
+                                _uiState.update { it.copy(downloadProgress = progress) }
+                            }
+                        }
+                    }.readRawBytes()
+                    
+                    outputFile.writeBytes(bytes)
+                    
+                    val absolutePath = outputFile.absolutePath
+                    val config = appPreferences.getBundleToolConfig() ?: data.state.PersistedBundleToolConfig()
+                    appPreferences.saveBundleToolConfig(config.copy(bundleToolPath = absolutePath))
+                    
+                    _uiState.update { it.copy(state = SplashState.DONE) }
+                } finally {
+                    client.close()
+                }
                 
             } catch (e: Exception) {
                 log.error("Failed to download BundleTool", e)

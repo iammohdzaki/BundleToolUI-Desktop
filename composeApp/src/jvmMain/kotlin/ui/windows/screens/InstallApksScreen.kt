@@ -25,6 +25,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -125,7 +128,7 @@ fun InstallApksScreen(viewModel: InstallApksViewModel) {
                 Box(
                     modifier = Modifier
                         .matchParentSize()
-                        .background(androidx.compose.ui.graphics.Color.Transparent)
+                        .background(Color.Transparent)
                         .clickable(
                             interactionSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
                             indication = null
@@ -158,22 +161,22 @@ fun InstallApksScreen(viewModel: InstallApksViewModel) {
                                             androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Text(
                                                     text = device.model.ifBlank { "Unknown Device" },
-                                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                                    fontWeight = FontWeight.Bold,
                                                     style = MaterialTheme.typography.bodyMedium
                                                 )
                                                 androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(start = 8.dp))
                                                 val isOnline = device.status == "device"
                                                 Box(
                                                     modifier = Modifier
-                                                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(4.dp))
-                                                        .background(if (isOnline) androidx.compose.ui.graphics.Color(0xFF4CAF50).copy(alpha = 0.2f) else androidx.compose.ui.graphics.Color(0xFFE57373).copy(alpha = 0.2f))
+                                                        .clip(RoundedCornerShape(4.dp))
+                                                        .background(if (isOnline) Color(0xFF4CAF50).copy(alpha = 0.2f) else Color(0xFFE57373).copy(alpha = 0.2f))
                                                         .padding(horizontal = 4.dp, vertical = 2.dp)
                                                 ) {
                                                     Text(
                                                         text = device.status.uppercase(),
                                                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
-                                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                                        color = if (isOnline) androidx.compose.ui.graphics.Color(0xFF2E7D32) else androidx.compose.ui.graphics.Color(0xFFC62828)
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = if (isOnline) Color(0xFF2E7D32) else Color(0xFFC62828)
                                                     )
                                                 }
                                             }

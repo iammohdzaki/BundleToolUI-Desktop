@@ -22,6 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import build.BuildConfig
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import data.state.SettingsEvent
 import ui.components.FilePickerField
@@ -131,7 +135,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                 )
             }
             // About & System Info Section
-            androidx.compose.material3.Divider(
+            HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
             )
@@ -144,7 +148,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                     text = "About & System Information",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    fontWeight = FontWeight.Bold
                 )
                 
                 Column(
@@ -152,12 +156,12 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                         .fillMaxWidth()
                         .background(
                             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                            androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+                            RoundedCornerShape(8.dp)
                         )
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    SystemInfoRow("App Version", "1.0.7")
+                    SystemInfoRow("App Version", BuildConfig.VERSION)
                     SystemInfoRow("OS Environment", "${System.getProperty("os.name")} ${System.getProperty("os.version")} (${System.getProperty("os.arch")})")
                     SystemInfoRow("Java Runtime", "${System.getProperty("java.version")} - ${System.getProperty("java.vendor")}")
                     
@@ -191,7 +195,7 @@ private fun SystemInfoRow(label: String, value: String) {
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+            fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
         )
     }

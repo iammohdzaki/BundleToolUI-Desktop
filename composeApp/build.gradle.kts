@@ -55,7 +55,6 @@ kotlin {
         }
         // UI test dependencies for JVM (Compose Desktop)
         val jvmTest by getting {
-            kotlin.srcDir("build/generated/buildConfig")
             dependencies {
                 implementation(compose.desktop.uiTestJUnit4)
                 implementation(libs.kotlin.test)
@@ -63,6 +62,7 @@ kotlin {
             }
         }
         val jvmMain by getting {
+            kotlin.srcDir("build/generated/buildConfig")
             resources.srcDir("src/jvmMain/composeResources")
         }
     }

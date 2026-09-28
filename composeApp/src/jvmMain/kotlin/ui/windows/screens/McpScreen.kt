@@ -12,6 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -113,30 +116,30 @@ private fun McpSetupTab(state: ui.windows.viewmodel.McpState, viewModel: McpView
             Text("AI Configuration Snippet", style = MaterialTheme.typography.titleMedium)
             Text("Copy this JSON into your Claude Desktop, Antigravity, or other MCP client configuration file to give it access to BundleTool.", style = MaterialTheme.typography.bodyMedium)
             
-            val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
+            val clipboardManager = LocalClipboardManager.current
             
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
-                    .background(androidx.compose.ui.graphics.Color(0xFF1E1E1E))
+                    .background(Color(0xFF1E1E1E))
             ) {
                 Text(
                     text = state.configSnippet,
-                    color = androidx.compose.ui.graphics.Color(0xFFD4D4D4),
+                    color = Color(0xFFD4D4D4),
                     fontFamily = FontFamily.Monospace,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(16.dp).padding(end = 40.dp)
                 )
                 
                 IconButton(
-                    onClick = { clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(state.configSnippet)) },
+                    onClick = { clipboardManager.setText(AnnotatedString(state.configSnippet)) },
                     modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)
                 ) {
                     Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Default.ContentCopy,
+                        imageVector = Icons.Default.ContentCopy,
                         contentDescription = "Copy to clipboard",
-                        tint = androidx.compose.ui.graphics.Color.Gray
+                        tint = Color.Gray
                     )
                 }
             }
@@ -160,13 +163,13 @@ private fun McpLogsTab(state: ui.windows.viewmodel.McpState, onClear: () -> Unit
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(8.dp))
-                .background(androidx.compose.ui.graphics.Color(0xFF1E1E1E))
+                .background(Color(0xFF1E1E1E))
                 .padding(16.dp)
         ) {
             if (state.logs.isEmpty()) {
                 Text(
                     text = "No logs yet. Start the server and connect an MCP client.",
-                    color = androidx.compose.ui.graphics.Color.Gray,
+                    color = Color.Gray,
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
@@ -177,7 +180,7 @@ private fun McpLogsTab(state: ui.windows.viewmodel.McpState, onClear: () -> Unit
                     state.logs.forEach { log ->
                         Text(
                             text = log,
-                            color = androidx.compose.ui.graphics.Color(0xFFA8C7FA),
+                            color = Color(0xFFA8C7FA),
                             fontFamily = FontFamily.Monospace,
                             style = MaterialTheme.typography.bodySmall
                         )
