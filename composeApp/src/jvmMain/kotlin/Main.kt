@@ -21,28 +21,47 @@ import ui.windows.viewmodel.SplashState
 
 import org.koin.core.context.GlobalContext
 
+import androidx.compose.ui.window.Tray
+import androidx.compose.ui.window.rememberTrayState
+
 fun main() = application {
     initKoin()
 
-    Window(
-        onCloseRequest = ::exitApplication,
-        state = rememberWindowState(
-            width = 1200.dp, height = 900.dp,
-            position = WindowPosition(Alignment.Center)
-        ),
-        title = stringResource(Res.string.app_name),
-        icon = painterResource("files/launcher.png")
-    ) {
-        val splashViewModel = remember { GlobalContext.get().get<SplashViewModel>() }
-        val splashState by splashViewModel.uiState.collectAsState()
+    var isMainWindowOpen by remember { mutableStateOf(true) }
+    val appIcon = painterResource("files/launcher.png")
+    
+    Tray(
+        icon = appIcon,
+        state = rememberTrayState(),
+        tooltip = "BundleTool UI",
+        onAction = { isMainWindowOpen = true },
+        menu = {
+            Item("Open BundleTool UI", onClick = { isMainWindowOpen = true })
+            Item("Exit", onClick = ::exitApplication)
+        }
+    )
 
-        when (splashState.state) {
-            SplashState.CHECKING, SplashState.NEEDS_SETUP, SplashState.DOWNLOADING -> {
-                SplashWindow(viewModel = splashViewModel, onFinish = { /* Handled by state change */ })
-            }
-            SplashState.DONE -> {
-                App {
-                    // optional close handler
+    if (isMainWindowOpen) {
+        Window(
+            onCloseRequest = { isMainWindowOpen = false }, // Hide window instead of exitApplication
+            state = rememberWindowState(
+                width = 1200.dp, height = 900.dp,
+                position = WindowPosition(Alignment.Center)
+            ),
+            title = stringResource(Res.string.app_name),
+            icon = appIcon
+        ) {
+            val splashViewModel = remember { GlobalContext.get().get<SplashViewModel>() }
+            val splashState by splashViewModel.uiState.collectAsState()
+    
+            when (splashState.state) {
+                SplashState.CHECKING, SplashState.NEEDS_SETUP, SplashState.DOWNLOADING -> {
+                    SplashWindow(viewModel = splashViewModel, onFinish = { /* Handled by state change */ })
+                }
+                SplashState.DONE -> {
+                    App {
+                        isMainWindowOpen = false
+                    }
                 }
             }
         }

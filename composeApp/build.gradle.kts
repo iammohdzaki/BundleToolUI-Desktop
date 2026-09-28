@@ -43,7 +43,13 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+            
+            // Ktor Client Engine
             implementation(libs.ktor.client.cio)
+            
+            // MCP Server module
+            implementation(project(":mcp-server"))
+            
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.logback.logging)
         }

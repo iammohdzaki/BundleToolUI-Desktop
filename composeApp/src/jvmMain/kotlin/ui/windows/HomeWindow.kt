@@ -49,6 +49,7 @@ fun HomeWindow(viewModel: HomeViewModel) {
                     viewModel = org.koin.compose.koinInject(),
                     onNavigateToDeviceSpec = { selectedItem = NavigationItem.GET_DEVICE_SPEC }
                 )
+                NavigationItem.MCP_SERVER -> ui.windows.screens.McpScreen(org.koin.compose.koinInject())
                 NavigationItem.SETTINGS -> ui.windows.screens.SettingsScreen(org.koin.compose.koinInject())
             }
         }

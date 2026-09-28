@@ -35,14 +35,25 @@ Bundle Tool UI - Desktop is an open-source tool built with Kotlin and Desktop Co
 </div>
 
 ## FEATURES
-* __AAB to APK Conversion__:Convert Android App Bundles (AAB) to Android Package (APK) files.
+* __AAB to APK Conversion__: Convert Android App Bundles (AAB) to Android Package (APK) files.
 * __User Interface__: Simple and intuitive user interface built with Desktop Compose.
 * __Signing Configuration__: Enable users to specify signing information, including debug or release signing, keystore paths, and passwords.
-* __Platform Compatibility__: Cross-platform support for Windows,macOS, and Linux.
+* __Platform Compatibility__: Cross-platform support for Windows, macOS, and Linux.
 * __Auto Save Jar Paths__: Enable users to save jar path for future use.
 * __Bundle Tool CLI Options__: Enable users to use CLI options from BundleTool.
+* __Background System Tray__: Runs quietly in the system tray when closed, allowing quick access without keeping the main window open.
+* __🤖 MCP Server Integration__: Built-in Model Context Protocol (MCP) HTTP server! Connect AI assistants (like Claude Desktop or Antigravity) directly to your local instance to build, analyze, and install APKs purely through chat, using the `bundletool-mcp` tools.
 
 ## Getting Started
+
+### Connecting an AI Assistant (MCP Server)
+BundleToolUI-Desktop includes a built-in **Model Context Protocol (MCP) Server**. This allows AI assistants like Claude Desktop, Cursor, or Antigravity to interact with BundleTool directly from your machine!
+
+1. Open BundleToolUI-Desktop and navigate to the **MCP Server** tab on the sidebar.
+2. Click **Start Server**.
+3. Copy the generated AI Configuration Snippet.
+4. Paste it into your AI assistant's `mcpServers` configuration file.
+5. You can now chat with your AI and say: *"Build my project's AAB into a Universal APK and install it to my device!"*
 
 To run BundleToolUI-Desktop on your system, download compressed build based on your OS and run .exe file.
 

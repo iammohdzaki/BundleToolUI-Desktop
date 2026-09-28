@@ -21,6 +21,7 @@ fun viewModelModules() = module {
     viewModel { ui.windows.viewmodel.InstallApksViewModel(get(), get()) }
     viewModel { ui.windows.viewmodel.GetDeviceSpecViewModel(get(), get()) }
     viewModel { ui.windows.viewmodel.GetSizeViewModel(get(), get()) }
+    viewModel { ui.windows.viewmodel.McpViewModel(get(), get()) }
 }
 
 fun storageModules() = module {

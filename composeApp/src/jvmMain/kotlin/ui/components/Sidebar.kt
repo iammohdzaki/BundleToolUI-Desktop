@@ -20,6 +20,8 @@ import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,6 +44,7 @@ enum class NavigationItem(val title: String, val icon: ImageVector) {
     INSTALL_APKS("Install APKs", Icons.Default.InstallMobile),
     GET_DEVICE_SPEC("Device Spec", Icons.Default.PhoneAndroid),
     GET_SIZE("Get Size", Icons.Default.Analytics),
+    MCP_SERVER("MCP Server", Icons.Default.SmartToy),
     SETTINGS("Settings", Icons.Default.Settings)
 }
 
