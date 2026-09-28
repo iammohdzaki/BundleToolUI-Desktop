@@ -21,11 +21,18 @@ import ui.windows.viewmodel.SplashState
 
 import org.koin.core.context.GlobalContext
 
+import org.slf4j.LoggerFactory
 import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.rememberTrayState
 
-fun main() = application {
-    initKoin()
+fun main() {
+    val logger = LoggerFactory.getLogger("BundleToolUI-Desktop")
+    Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+        logger.error("Uncaught exception in thread ${thread.name}", throwable)
+    }
+
+    application {
+        initKoin()
 
     var isMainWindowOpen by remember { mutableStateOf(true) }
     val appIcon = painterResource("files/launcher.png")
@@ -66,4 +73,4 @@ fun main() = application {
             }
         }
     }
-}
+}}
