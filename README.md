@@ -31,7 +31,7 @@ Bundle Tool UI - Desktop is an open-source tool built with Kotlin and Desktop Co
   </p>
 
 <div align="center">
-<img src='https://github.com/iammohdzaki/AabToApk-Desktop/blob/main/assets/ata.png' width=50% height=50% alt="BundleTool-UI">
+<img src='[https://github.com/iammohdzaki/AabToApk-Desktop/blob/main/assets/ata.png](https://github.com/iammohdzaki/BundleToolUI-Desktop/blob/feature/ui-modernization/assets/ata.png)' width=50% height=50% alt="BundleTool-UI">
 </div>
 
 ## FEATURES
