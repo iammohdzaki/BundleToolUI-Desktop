@@ -68,12 +68,16 @@ kotlin {
     }
 }
 
-version = "2.0.0"
+version = "2.0.1"
 compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            
+            // Required for Ktor CIO and HTTPS
+            modules("java.instrument", "java.management", "java.naming", "java.sql", "jdk.crypto.ec")
+            
             packageName = "AabToApk"
             packageVersion = project.version.toString()
             val iconsRoot = project.file("desktop-icons")

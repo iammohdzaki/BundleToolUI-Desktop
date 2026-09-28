@@ -119,7 +119,7 @@ class SettingsViewModel(
                     client.close()
                 }
                 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 log.error("Failed to download BundleTool", e)
                 val msg = if (e is java.net.ConnectException) {
                     "Connection timed out. Please check your internet or firewall, or download manually from https://github.com/google/bundletool/releases"
