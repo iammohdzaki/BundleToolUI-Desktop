@@ -68,7 +68,7 @@ kotlin {
     }
 }
 
-version = "2.0.2"
+version = "2.0.3"
 compose.desktop {
     application {
         mainClass = "MainKt"
@@ -76,7 +76,15 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             
             // Required for Ktor CIO and HTTPS
-            modules("java.instrument", "java.management", "java.naming", "java.sql", "jdk.crypto.ec")
+            modules(
+                "java.instrument", 
+                "java.management", 
+                "java.naming", 
+                "java.sql", 
+                "jdk.crypto.ec",
+                "jdk.unsupported",
+                "jdk.unsupported.desktop"
+            )
             
             packageName = "AabToApk"
             packageVersion = project.version.toString()
