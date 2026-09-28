@@ -1,9 +1,12 @@
 name: Release Desktop Apps
 
 on:
-  push:
-    tags:
-      - 'v*' # Trigger on tags like v1.0.0
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for the release (e.g., v2.0.0)'
+        required: false
+        type: string
 
 jobs:
   build:
@@ -65,6 +68,7 @@ jobs:
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag_name }}
           files: |
             artifacts/**/*.dmg
             artifacts/**/*.msi
