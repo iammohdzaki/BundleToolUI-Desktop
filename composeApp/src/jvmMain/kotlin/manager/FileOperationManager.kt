@@ -1,5 +1,6 @@
 package manager
 
+import data.domain.CommandResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import utils.files.FileActionResult
@@ -39,6 +40,26 @@ class FileOperationManager(
             FileActionResult.Success(message)
         } catch (e: Exception) {
             FileActionResult.Failure("Unzipping failed: ${e.localizedMessage}")
+        }
+    }
+
+    suspend fun extractApksArchive(
+        apksPath: String,
+        outputDir: String,
+        durationMs: Long
+    ): CommandResult = withContext(Dispatchers.IO) {
+        val apksFile = File(apksPath)
+        val outDir = File(outputDir)
+        if (!outDir.exists()) outDir.mkdirs()
+
+        try {
+            fileUtils.unzip(apksFile, outputDir)
+            CommandResult.Success(
+                "Successfully extracted all APKs from archive to ${outDir.absolutePath}",
+                durationMs
+            )
+        } catch (e: Exception) {
+            CommandResult.Failure("Failed to extract APKS archive: ${e.localizedMessage}")
         }
     }
 }

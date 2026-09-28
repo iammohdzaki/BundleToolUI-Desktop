@@ -2,7 +2,6 @@ package ui.windows.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import command.CommandBuilder
 import data.domain.CommandResult
 import data.state.BundleToolEvent
 import data.state.BundleToolState
@@ -80,7 +79,35 @@ class HomeViewModel(
                 it.copy(signingState = it.signingState.copy(keyPassword = event.password))
             }
 
-            is BundleToolEvent.SelectMode -> _uiState.update { it.copy(mode = event.mode) }
+            is BundleToolEvent.SelectMode -> _uiState.update { 
+                var newConnectedDevice = it.connectedDevice
+                var newDeviceSpecPath = it.deviceSpecPath
+                var newDeviceId = it.deviceId
+                if (event.mode == OutputMode.Universal) {
+                    newConnectedDevice = false
+                    newDeviceSpecPath = ""
+                    newDeviceId = ""
+                }
+                it.copy(mode = event.mode, connectedDevice = newConnectedDevice, deviceSpecPath = newDeviceSpecPath, deviceId = newDeviceId) 
+            }
+            is BundleToolEvent.SetOverwrite -> _uiState.update { it.copy(overwrite = event.overwrite) }
+            is BundleToolEvent.SelectAapt2Path -> _uiState.update { it.copy(aapt2Path = event.path) }
+            is BundleToolEvent.SetConnectedDevice -> _uiState.update { 
+                var newMode = it.mode
+                if (event.connectedDevice && it.mode == OutputMode.Universal) {
+                    newMode = OutputMode.ApkSet
+                }
+                it.copy(connectedDevice = event.connectedDevice, mode = newMode) 
+            }
+            is BundleToolEvent.SetDeviceId -> _uiState.update { it.copy(deviceId = event.deviceId) }
+            is BundleToolEvent.SelectDeviceSpecPath -> _uiState.update { 
+                var newMode = it.mode
+                if (event.path.isNotBlank() && it.mode == OutputMode.Universal) {
+                    newMode = OutputMode.ApkSet
+                }
+                it.copy(deviceSpecPath = event.path, mode = newMode) 
+            }
+            is BundleToolEvent.SetLocalTesting -> _uiState.update { it.copy(localTesting = event.localTesting) }
             is BundleToolEvent.Convert -> convert()
         }
     }
@@ -90,32 +117,38 @@ class HomeViewModel(
         log.info("Starting conversion for AAB: {}", state.aabPath)
 
         _uiState.update {
-            it.copy(isConverting = true, log = "🚀 Starting conversion...\n")
+            it.copy(isConverting = true, successOutputPath = null, log = "🚀 Starting conversion...\n")
         }
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 persistCurrentState()
-                val config = CommandBuilder.Config(
+                val config = command.BuildApksCommand.Config(
                     bundleToolPath = state.bundleToolPath,
                     aabPath = state.aabPath,
                     outputDir = state.outputDir,
                     isUniversal = state.mode == OutputMode.Universal,
                     keystore = if (state.signingState.signingMode == SigningMode.Release)
-                        CommandBuilder.KeystoreConfig(
+                        command.BuildApksCommand.KeystoreConfig(
                             path = state.signingState.keystorePath,
                             password = state.signingState.keystorePassword,
                             alias = state.signingState.keyAlias,
                             keyPassword = state.signingState.keyPassword
-                        ) else null
+                        ) else null,
+                    overwrite = state.overwrite,
+                    aapt2Path = state.aapt2Path,
+                    connectedDevice = state.connectedDevice,
+                    deviceId = state.deviceId,
+                    deviceSpecPath = state.deviceSpecPath,
+                    localTesting = state.localTesting
                 )
 
-                log.debug("Generated CommandBuilder config: {}", config)
+                log.debug("Generated Command config: {}", config)
 
-                val (command, result) = commandUseCase.executeBundleTool(config)
+                val (commandExecuted, result) = commandUseCase.executeBundleTool(command.BuildApksCommand(config))
 
-                log.info("Executing command: {}", command)
-                _uiState.update { it.copy(log = it.log + "\n> $command\n") }
+                log.info("Executing command: {}", commandExecuted)
+                _uiState.update { it.copy(log = it.log + "\n> $commandExecuted\n") }
 
                 when (result) {
                     is CommandResult.Success -> {
@@ -123,6 +156,7 @@ class HomeViewModel(
                         _uiState.update {
                             it.copy(
                                 isConverting = false,
+                                successOutputPath = config.outputDir ?: java.io.File(config.aabPath).parent,
                                 log = it.log + "\n✅ ${result.output}\nCompleted in ${result.durationMs}ms"
                             )
                         }
@@ -187,6 +221,8 @@ class HomeViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             log.info("Loading persisted bundle tool state from preferences...")
             val savedConfig = appPreferences.getBundleToolConfig()
+            val suggestions = getSpecSuggestions()
+            
             if (savedConfig != null) {
                 log.debug("Loaded persisted config: {}", savedConfig)
                 _uiState.update {
@@ -195,24 +231,50 @@ class HomeViewModel(
                         aabPath = savedConfig.aabPath,
                         outputDir = savedConfig.outputDir,
                         mode = savedConfig.mode,
-                        signingState = savedConfig.signingState
+                        signingState = savedConfig.signingState,
+                        overwrite = savedConfig.overwrite,
+                        aapt2Path = savedConfig.aapt2Path,
+                        connectedDevice = savedConfig.connectedDevice,
+                        deviceId = savedConfig.deviceId,
+                        deviceSpecPath = savedConfig.deviceSpecPath,
+                        specSuggestions = suggestions,
+                        localTesting = savedConfig.localTesting
                     )
                 }
             } else {
                 log.warn("No saved bundle tool configuration found.")
+                _uiState.update { it.copy(specSuggestions = suggestions) }
             }
+        }
+    }
+
+    private fun getSpecSuggestions(): List<String> {
+        val defaultSpecsDir = java.io.File(System.getProperty("user.home"), ".bundletool_ui/specs")
+        return if (defaultSpecsDir.exists()) {
+            defaultSpecsDir.listFiles()?.filter { it.extension == "json" }?.map { it.absolutePath } ?: emptyList()
+        } else {
+            emptyList()
         }
     }
 
     private fun persistCurrentState() {
         viewModelScope.launch(Dispatchers.IO) {
             val state = uiState.value
+            val existingConfig = appPreferences.getBundleToolConfig()
+            
             val config = PersistedBundleToolConfig(
                 bundleToolPath = state.bundleToolPath,
+                adbPath = existingConfig?.adbPath ?: "",
                 aabPath = state.aabPath,
                 outputDir = state.outputDir,
                 mode = state.mode,
-                signingState = state.signingState
+                signingState = state.signingState,
+                overwrite = state.overwrite,
+                aapt2Path = state.aapt2Path,
+                connectedDevice = state.connectedDevice,
+                deviceId = state.deviceId,
+                deviceSpecPath = state.deviceSpecPath,
+                localTesting = state.localTesting
             )
 
             log.debug("Persisting current config: {}", config)

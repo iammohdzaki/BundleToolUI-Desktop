@@ -21,9 +21,9 @@ import androidx.compose.ui.unit.dp
 fun DottedBorderBox(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.outlineVariant,
-    cornerRadius: Float = 16f,
-    dotSpacing: Float = 10f,
-    dotLength: Float = 10f,
+    cornerRadius: Float = 12f,
+    dotSpacing: Float = 4f,
+    dotLength: Float = 4f,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
@@ -37,7 +37,7 @@ fun DottedBorderBox(
                 color = color,
                 size = Size(size.width, size.height),
                 style = Stroke(
-                    width = 2f,
+                    width = 1.5f,
                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(dotLength, dotSpacing))
                 ),
                 cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadius, cornerRadius)

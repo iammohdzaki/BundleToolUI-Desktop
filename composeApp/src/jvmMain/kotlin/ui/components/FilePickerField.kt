@@ -15,6 +15,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +34,7 @@ import java.awt.FileDialog
 import java.awt.Frame
 import javax.swing.JFileChooser
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun FilePickerField(
     label: String,
@@ -43,16 +45,20 @@ fun FilePickerField(
     modifier: Modifier = Modifier.fillMaxWidth(),
     fileExtensionFilter: String? = null, // e.g. ".aab" or ".jks",
     selectFolder: Boolean = false,
+    isSaveDialog: Boolean = false,
+    suggestions: List<String> = emptyList(),
+    tooltipText: String? = null,
     onPick: (String) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
     if (showDialog) {
         LaunchedEffect(Unit) {
             val path = if (selectFolder)
                 pickFolder(dialogTitle)
             else
-                pickFile(dialogTitle, fileExtensionFilter)
+                pickFile(dialogTitle, fileExtensionFilter, isSaveDialog)
 
             if (path != null) onPick(path)
             showDialog = false
@@ -62,65 +68,124 @@ fun FilePickerField(
     Column(modifier = modifier) {
 
         // Label (above field)
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            ),
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+            if (tooltipText != null) {
+                HelpTooltip(
+                    text = tooltipText,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+        }
 
         // Field + Icon (in one Row)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    shape = RoundedCornerShape(8.dp)
-                ).clickable { showDialog = true },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // File path text
-            Text(
-                text = value.ifEmpty { placeholder },
-                color = if (value.isNotEmpty())
-                    MaterialTheme.colorScheme.onSurface
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant,
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 16.dp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            // Folder button
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(48.dp)
+                    .fillMaxWidth()
+                    .height(48.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(
-                            topEnd = 8.dp,
-                            bottomEnd = 8.dp
-                        )
-                    ),
-                contentAlignment = Alignment.Center
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        shape = RoundedCornerShape(8.dp)
+                    ).clickable {
+                        if (suggestions.isNotEmpty()) expanded = true
+                        else showDialog = true
+                    },
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = if (selectFolder) Icons.Default.Folder else Icons.Default.FolderOpen,
-                    contentDescription = if (selectFolder) "Select Folder" else "Select File",
-                    tint = Color.White
+                // File path text
+                Text(
+                    text = value.ifEmpty { placeholder },
+                    color = if (value.isNotEmpty())
+                        MaterialTheme.colorScheme.onSurface
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium
                 )
+
+                // Folder button
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(
+                                topEnd = 8.dp,
+                                bottomEnd = 8.dp
+                            )
+                        )
+                        .clickable { 
+                            if (suggestions.isNotEmpty()) expanded = true 
+                            else showDialog = true 
+                        }
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (suggestions.isNotEmpty()) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Show suggestions",
+                                tint = Color.White
+                            )
+                            androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(4.dp))
+                        }
+                        Icon(
+                            imageVector = if (selectFolder) Icons.Default.Folder else Icons.Default.FolderOpen,
+                            contentDescription = if (selectFolder) "Select Folder" else "Select File",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+
+            if (suggestions.isNotEmpty()) {
+                androidx.compose.material3.DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text("Browse...", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
+                        onClick = {
+                            expanded = false
+                            showDialog = true
+                        },
+                        leadingIcon = {
+                            androidx.compose.material3.Icon(
+                                imageVector = Icons.Default.FolderOpen,
+                                contentDescription = "Browse"
+                            )
+                        }
+                    )
+                    androidx.compose.material3.HorizontalDivider()
+                    suggestions.forEach { suggestion ->
+                        val fileName = java.io.File(suggestion).name
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { Text(fileName) },
+                            onClick = {
+                                onPick(suggestion)
+                                expanded = false
+                            }
+                        )
+                    }
+                }
             }
         }
         clickableText?.let {
             ClickableLinkText(
                 text = it.text,
                 url = it.url,
+                onClick = it.onClick,
                 highlightColor = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -131,15 +196,20 @@ fun FilePickerField(
 /**
  * Opens a native desktop file dialog and returns the selected path (or null if canceled).
  */
-fun pickFile(title: String, extension: String?): String? {
+fun pickFile(title: String, extension: String?, isSaveDialog: Boolean = false): String? {
     return try {
-        val dialog = FileDialog(null as Frame?, title, FileDialog.LOAD).apply {
+        val mode = if (isSaveDialog) FileDialog.SAVE else FileDialog.LOAD
+        val dialog = FileDialog(null as Frame?, title, mode).apply {
             isMultipleMode = false
             if (extension != null) file = "*$extension"
         }
         dialog.isVisible = true
         dialog.file?.let { file ->
-            dialog.directory + file
+            var finalFile = file
+            if (isSaveDialog && extension != null && !finalFile.endsWith(extension)) {
+                finalFile += extension
+            }
+            dialog.directory + finalFile
         }
     } catch (e: Exception) {
         e.printStackTrace()
@@ -152,6 +222,7 @@ fun pickFile(title: String, extension: String?): String? {
  */
 fun pickFolder(title: String): String? {
     return try {
+        javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName())
         val chooser = JFileChooser().apply {
             dialogTitle = title
             fileSelectionMode = JFileChooser.DIRECTORIES_ONLY

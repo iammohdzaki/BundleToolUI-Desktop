@@ -17,21 +17,21 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun WindowHeader(
     title: String,
-    subTitle: String
+    subTitle: String,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(bottom = 24.dp),
+        horizontalAlignment = horizontalAlignment
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
-            ),
-            textAlign = TextAlign.Center
+            )
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -40,8 +40,7 @@ fun WindowHeader(
             text = subTitle,
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            ),
-            textAlign = TextAlign.Center
+            )
         )
     }
 }

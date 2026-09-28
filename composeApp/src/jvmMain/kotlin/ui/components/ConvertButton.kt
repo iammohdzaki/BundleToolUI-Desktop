@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ButtonWithLoader(
+    text: String = "Convert",
     enabled: Boolean,
     isLoading: Boolean,
     onClick: () -> Unit,
@@ -70,7 +71,7 @@ fun ButtonWithLoader(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Convert",
+                        text = text,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
